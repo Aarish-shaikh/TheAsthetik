@@ -1,0 +1,595 @@
+/* ==========================================================================
+   The Asthetik - Calendly-Style Multi-Step Booking Widget
+   Mobile-first, accessible, matched to clinic luxury dark/gold aesthetic
+   ========================================================================== */
+
+:root {
+  --asthetik-gold: #c5a880;
+  --asthetik-gold-hover: #d8bc96;
+  --asthetik-gold-glow: rgba(197, 168, 128, 0.25);
+  --asthetik-dark-bg: #0d1b2a;
+  --asthetik-card-bg: #111f30;
+  --asthetik-card-subtle: #16263a;
+  --asthetik-border: rgba(197, 168, 128, 0.22);
+  --asthetik-border-focus: #c5a880;
+  --asthetik-text-main: #f8fafc;
+  --asthetik-text-muted: #94a3b8;
+  --asthetik-danger: #ef4444;
+  --asthetik-success: #22c55e;
+  --asthetik-wa-green: #25d366;
+  --asthetik-radius: 12px;
+}
+
+#asthetik-booking-app {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  background: var(--asthetik-card-bg);
+  border: 1px solid var(--asthetik-border);
+  border-radius: var(--asthetik-radius);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+  color: var(--asthetik-text-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+#asthetik-booking-app *,
+#asthetik-booking-app *::before,
+#asthetik-booking-app *::after {
+  box-sizing: border-box;
+}
+
+/* Header & Progress Indicator */
+.ast-booking-header {
+  padding: 24px 24px 18px 24px;
+  background: linear-gradient(180deg, #16273b 0%, var(--asthetik-card-bg) 100%);
+  border-bottom: 1px solid var(--asthetik-border);
+}
+
+.ast-booking-title {
+  margin: 0 0 6px 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--asthetik-text-main);
+  letter-spacing: -0.01em;
+}
+
+.ast-booking-subtitle {
+  margin: 0 0 18px 0;
+  font-size: 0.88rem;
+  color: var(--asthetik-text-muted);
+}
+
+.ast-progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 10px;
+}
+
+.ast-progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  z-index: 1;
+}
+
+.ast-progress-fill {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  height: 2px;
+  background: var(--asthetik-gold);
+  z-index: 2;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ast-progress-step {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.ast-step-bubble {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: var(--asthetik-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.ast-progress-step.active .ast-step-bubble {
+  background: var(--asthetik-gold);
+  border-color: var(--asthetik-gold);
+  color: #0b1320;
+  box-shadow: 0 0 12px var(--asthetik-gold-glow);
+}
+
+.ast-progress-step.completed .ast-step-bubble {
+  background: #14532d;
+  border-color: var(--asthetik-success);
+  color: #86efac;
+}
+
+.ast-step-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--asthetik-text-muted);
+  white-space: nowrap;
+}
+
+.ast-progress-step.active .ast-step-label {
+  color: var(--asthetik-gold);
+  font-weight: 600;
+}
+
+/* Step Container */
+.ast-step-container {
+  padding: 24px;
+}
+
+.ast-step-pane {
+  display: none;
+  animation: astFadeIn 0.25s ease-in-out;
+}
+
+.ast-step-pane.active {
+  display: block;
+}
+
+@keyframes astFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ast-pane-heading {
+  margin: 0 0 8px 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--asthetik-text-main);
+}
+
+.ast-pane-desc {
+  margin: 0 0 20px 0;
+  font-size: 0.85rem;
+  color: var(--asthetik-text-muted);
+  line-height: 1.4;
+}
+
+/* Branch Cards (Step 1) */
+.ast-branch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ast-branch-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--asthetik-card-subtle);
+  border: 1.5px solid var(--asthetik-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.ast-branch-card:hover {
+  border-color: var(--asthetik-gold);
+  background: #192c42;
+  transform: translateY(-1px);
+}
+
+.ast-branch-card.selected {
+  border-color: var(--asthetik-gold);
+  background: rgba(197, 168, 128, 0.08);
+  box-shadow: 0 0 15px var(--asthetik-gold-glow);
+}
+
+.ast-branch-card:focus-visible {
+  outline: 2px solid var(--asthetik-gold);
+  outline-offset: 2px;
+}
+
+.ast-radio-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  margin-top: 3px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease;
+}
+
+.ast-branch-card.selected .ast-radio-circle {
+  border-color: var(--asthetik-gold);
+}
+
+.ast-radio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--asthetik-gold);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: all 0.2s ease;
+}
+
+.ast-branch-card.selected .ast-radio-dot {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ast-branch-card-body {
+  flex: 1;
+}
+
+.ast-branch-card-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--asthetik-text-main);
+  margin-bottom: 4px;
+}
+
+.ast-branch-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(197, 168, 128, 0.15);
+  color: var(--asthetik-gold);
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.ast-branch-info-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--asthetik-text-muted);
+  margin-top: 4px;
+}
+
+.ast-branch-info-row svg {
+  width: 14px;
+  height: 14px;
+  fill: var(--asthetik-gold);
+  flex-shrink: 0;
+}
+
+/* Service Selection (Step 2) */
+.ast-form-group {
+  margin-bottom: 20px;
+}
+
+.ast-label {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--asthetik-text-main);
+  margin-bottom: 8px;
+}
+
+.ast-select,
+.ast-input,
+.ast-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: #0d1723;
+  border: 1px solid var(--asthetik-border);
+  border-radius: 8px;
+  color: var(--asthetik-text-main);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.ast-select:focus,
+.ast-input:focus,
+.ast-textarea:focus {
+  border-color: var(--asthetik-border-focus);
+  box-shadow: 0 0 0 3px var(--asthetik-gold-glow);
+}
+
+.ast-select option {
+  background: #0d1723;
+  color: #ffffff;
+}
+
+.ast-service-preview-card {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--asthetik-card-subtle);
+  border-left: 3px solid var(--asthetik-gold);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--asthetik-text-muted);
+}
+
+/* Date & Time (Step 3) */
+.ast-date-time-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ast-slots-section {
+  margin-top: 10px;
+}
+
+.ast-slots-label {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--asthetik-text-main);
+  margin-bottom: 10px;
+}
+
+.ast-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 8px;
+  max-height: 230px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ast-slot-pill {
+  padding: 9px 6px;
+  background: var(--asthetik-card-subtle);
+  border: 1px solid var(--asthetik-border);
+  border-radius: 6px;
+  color: var(--asthetik-text-main);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+  outline: none;
+}
+
+.ast-slot-pill:hover:not(.disabled) {
+  border-color: var(--asthetik-gold);
+  background: #192c42;
+}
+
+.ast-slot-pill.selected {
+  background: var(--asthetik-gold);
+  border-color: var(--asthetik-gold);
+  color: #0c1724;
+  font-weight: 700;
+  box-shadow: 0 0 10px var(--asthetik-gold-glow);
+}
+
+.ast-slot-pill.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #0b121c;
+  text-decoration: line-through;
+}
+
+.ast-slots-notice {
+  padding: 12px;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-size: 0.85rem;
+}
+
+/* Patient Details (Step 4) */
+.ast-input-hint {
+  font-size: 0.76rem;
+  color: var(--asthetik-text-muted);
+  margin-top: 5px;
+}
+
+.ast-error-msg {
+  display: none;
+  font-size: 0.78rem;
+  color: var(--asthetik-danger);
+  margin-top: 5px;
+}
+
+.ast-has-error .ast-input {
+  border-color: var(--asthetik-danger);
+}
+
+.ast-has-error .ast-error-msg {
+  display: block;
+}
+
+/* Confirmation Summary (Step 5) */
+.ast-summary-card {
+  background: var(--asthetik-card-subtle);
+  border: 1px solid var(--asthetik-border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.ast-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.88rem;
+}
+
+.ast-summary-row:last-child {
+  border-bottom: none;
+}
+
+.ast-summary-label {
+  color: var(--asthetik-text-muted);
+  font-weight: 500;
+  flex: 0 0 35%;
+}
+
+.ast-summary-value {
+  color: var(--asthetik-text-main);
+  font-weight: 600;
+  text-align: right;
+  flex: 1;
+}
+
+.ast-whatsapp-cta-box {
+  background: rgba(37, 211, 102, 0.1);
+  border: 1px solid rgba(37, 211, 102, 0.35);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.ast-whatsapp-cta-box p {
+  margin: 0 0 14px 0;
+  font-size: 0.88rem;
+  color: #e2e8f0;
+  line-height: 1.45;
+}
+
+.ast-btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 20px;
+  background: var(--asthetik-wa-green);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.ast-btn-whatsapp:hover {
+  background: #20ba5a;
+  transform: translateY(-1px);
+}
+
+.ast-btn-whatsapp svg {
+  width: 22px;
+  height: 22px;
+  fill: #ffffff;
+}
+
+.ast-backup-status {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--asthetik-text-muted);
+  text-align: center;
+}
+
+/* Navigation Buttons */
+.ast-booking-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ast-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.ast-btn:focus-visible {
+  outline: 2px solid var(--asthetik-gold);
+  outline-offset: 2px;
+}
+
+.ast-btn-primary {
+  background: linear-gradient(135deg, var(--asthetik-gold) 0%, #b39268 100%);
+  color: #0a121c;
+}
+
+.ast-btn-primary:hover {
+  background: linear-gradient(135deg, var(--asthetik-gold-hover) 0%, var(--asthetik-gold) 100%);
+  transform: translateY(-1px);
+}
+
+.ast-btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #cbd5e1;
+}
+
+.ast-btn-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Mobile Adjustments (down to 360px) */
+@media (max-width: 520px) {
+  #asthetik-booking-app {
+    border-radius: 8px;
+  }
+  .ast-booking-header {
+    padding: 18px 16px 14px 16px;
+  }
+  .ast-step-container {
+    padding: 18px 16px;
+  }
+  .ast-step-label {
+    display: none;
+  }
+  .ast-summary-row {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .ast-summary-value {
+    text-align: left;
+  }
+  .ast-slots-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

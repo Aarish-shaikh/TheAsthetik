@@ -2,6 +2,15 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
+// Attempt to load .env file if available (native in Node.js 20.12+)
+try {
+  if (typeof process.loadEnvFile === 'function') {
+    process.loadEnvFile();
+  }
+} catch (e) {
+  // .env is optional
+}
+
 const PORT = process.env.PORT || 3000;
 const ROOT_DIR = __dirname;
 
@@ -46,6 +55,64 @@ const server = http.createServer((req, res) => {
   if (reqUrl.searchParams.has('jkit-ajax-request')) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'success' }));
+    return;
+  }
+
+  // Handle appointment booking backup endpoint
+  if (pathname === '/api/book' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk;
+      if (body.length > 1e6) req.destroy(); // Prevent flood
+    });
+    req.on('end', async () => {
+      try {
+        const booking = JSON.parse(body || '{}');
+        console.log('[BOOKING BACKUP RECEIVED]', new Date().toISOString(), {
+          patient: booking.name,
+          phone: booking.phone,
+          branch: booking.branchName || booking.branchId,
+          service: booking.serviceName,
+          date: booking.date,
+          time: booking.timeSlot
+        });
+
+        const backupResult = { triggered: false, success: false };
+        const webhookUrl = process.env.BOOKING_BACKUP_WEBHOOK_URL;
+
+        if (webhookUrl) {
+          try {
+            backupResult.triggered = true;
+            const webhookResp = await fetch(webhookUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(process.env.BOOKING_BACKUP_SECRET_KEY ? { 'Authorization': `Bearer ${process.env.BOOKING_BACKUP_SECRET_KEY}` } : {})
+              },
+              body: JSON.stringify({
+                source: 'The Asthetik Website Booking',
+                receivedAt: new Date().toISOString(),
+                booking: booking
+              }),
+              signal: AbortSignal.timeout(5000)
+            });
+            backupResult.success = webhookResp.ok;
+          } catch (webhookErr) {
+            console.warn('[BOOKING BACKUP WEBHOOK ERROR]', webhookErr.message);
+          }
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: 'Booking recorded successfully',
+          backup: backupResult
+        }));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON body' }));
+      }
+    });
     return;
   }
 
