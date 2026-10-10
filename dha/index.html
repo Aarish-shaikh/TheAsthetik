@@ -7,12 +7,13 @@
 	<meta name="description" content="Visit The Asthetik clinic in DHA Phase 6, Karachi. Led by Dr. Samina Habib, offering premium aesthetic procedures, HydraFacial, laser treatments, and skincare.">
 	<link rel="canonical" href="https://aestheticsbydrsamina.com/dha/">
 
+	<!-- Google Fonts: Inter & Lato -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap">
+
 	<!-- Stylesheets -->
 	<link rel='stylesheet' href='/wp-content/plugins/elementor/assets/lib/font-awesome/css/all.min.css?ver=4.1.4' media='all' />
-	<link rel='stylesheet' href='/wp-content/plugins/header-footer-elementor/inc/widgets-css/frontend.css?ver=2.9.2' media='all' />
-	<link rel='stylesheet' href='/wp-content/plugins/jeg-elementor-kit/assets/css/elements/main.css?ver=3.1.2' media='all' />
-	<link rel='stylesheet' href='/wp-content/uploads/elementor/css/post-6.css?ver=1790867084' media='all' />
-	<link rel='stylesheet' href='/wp-content/uploads/elementor/css/global.css?ver=1790867085' media='all' />
 	<link rel='stylesheet' href='/assets/branch/branch.css' media='all' />
 	<link rel='stylesheet' href='/assets/whatsapp/whatsapp.css' media='all' />
 
@@ -62,42 +63,28 @@
 	</script>
 </head>
 
-<body class="page-template default-template elementor-default elementor-kit-6">
-	<!-- Standard Header -->
-	<header data-elementor-type="header" data-elementor-id="79" class="elementor elementor-79 elementor-location-header">
-		<section class="elementor-section elementor-top-section elementor-element elementor-element-2bcbe18 elementor-section-boxed">
-			<div class="elementor-container elementor-column-gap-default">
-				<div class="elementor-column elementor-col-33 elementor-top-column elementor-element">
-					<div class="elementor-widget-wrap elementor-element-populated">
-						<div class="elementor-element elementor-widget elementor-widget-image">
-							<a href="/" aria-label="The Asthetik Home">
-								<img width="500" height="150" src="/wp-content/uploads/2025/11/the-ashthetik2Flogo20horizontal20white.webp" alt="The Asthetik" style="max-width:210px; height:auto;">
-							</a>
-						</div>
-					</div>
-				</div>
-				<div class="elementor-column elementor-col-33 elementor-top-column elementor-element">
-					<div class="elementor-widget-wrap elementor-element-populated">
-						<nav class="jkit-menu-wrapper" aria-label="Main Navigation">
-							<ul class="jkit-menu" style="display:flex; list-style:none; gap:20px; margin:0; padding:15px 0;">
-								<li><a href="/" style="color:#ffffff; text-decoration:none;">Home</a></li>
-								<li><a href="/about-us/" style="color:#ffffff; text-decoration:none;">About Us</a></li>
-								<li><a href="/shah-faisal-colony/" style="color:#ffffff; text-decoration:none;">Shah Faisal</a></li>
-								<li><a href="/dha/" style="color:#c5a880; font-weight:600; text-decoration:none;">DHA Phase 6</a></li>
-								<li><a href="/hydrafacial/" style="color:#ffffff; text-decoration:none;">HydraFacial</a></li>
-							</ul>
-						</nav>
-					</div>
-				</div>
-				<div class="elementor-column elementor-col-33 elementor-top-column elementor-element elementor-hidden-phone">
-					<div class="elementor-widget-wrap elementor-element-populated" style="display:flex; justify-content:flex-end; align-items:center;">
-						<a class="elementor-button elementor-size-sm" href="/book-an-appointment/?branch=dha" style="background:#c5a880; color:#0b1320; padding:10px 18px; border-radius:6px; font-weight:600; text-decoration:none;">
-							Book Consultation
-						</a>
-					</div>
-				</div>
-			</div>
-		</section>
+<body class="ast-branch-body">
+	<!-- Standard Luxury Header -->
+	<header class="ast-branch-header">
+		<div class="ast-branch-nav-container">
+			<a href="/" class="ast-branch-logo-link" aria-label="The Asthetik Home">
+				<img src="/wp-content/uploads/2025/11/the-ashthetik2Flogo20horizontal20white.webp" alt="The Asthetik" class="ast-branch-logo-img" width="200" height="60">
+			</a>
+			
+			<nav aria-label="Main Navigation">
+				<ul class="ast-branch-nav-menu">
+					<li><a href="/">Home</a></li>
+					<li><a href="/about-us/">About Us</a></li>
+					<li><a href="/shah-faisal-colony/">Shah Faisal Branch</a></li>
+					<li><a href="/dha/" class="active">DHA Phase 6</a></li>
+					<li><a href="/hydrafacial/">HydraFacial</a></li>
+				</ul>
+			</nav>
+
+			<a href="/book-an-appointment/?branch=dha" class="ast-branch-nav-cta">
+				Book Consultation
+			</a>
+		</div>
 	</header>
 
 	<!-- Main Branch Page Content -->
@@ -105,10 +92,10 @@
 		<!-- Hero & Breadcrumbs -->
 		<div class="ast-branch-hero">
 			<nav class="ast-branch-breadcrumbs" aria-label="Breadcrumb">
-				<a href="/">Home</a> / <a href="/book-an-appointment/">Branches</a> / <span>DHA Phase 6</span>
+				<a href="/">Home</a> <span class="sep">/</span> <a href="/book-an-appointment/">Branches</a> <span class="sep">/</span> <span>DHA Phase 6</span>
 			</nav>
 			<h1 class="ast-branch-title">The Asthetik – DHA Phase 6 Branch</h1>
-			<p class="ast-branch-subtitle">Luxury Aesthetics & Clinical Dermatology in Defence, Karachi</p>
+			<p class="ast-branch-subtitle">Flagship Aesthetic Medicine & Advanced Skincare Suite by Dr. Samina Habib</p>
 		</div>
 
 		<!-- Grid: Details & Map -->
@@ -124,7 +111,7 @@
 						<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
 						<div class="ast-branch-info-text">
 							<strong>Clinic Address</strong>
-							<span>Office 102, First Floor, Plot No. 54C, Lane 4, DHA Phase 6, Shahbaz Commercial Area, Defence Housing Authority, Karachi 75500</span>
+							<span>Office 102, 1st Floor, Plot No. 54C, Lane 4, DHA Phase 6, Shahbaz Commercial, Karachi 75500</span>
 						</div>
 					</div>
 
@@ -132,14 +119,14 @@
 						<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm1.7-5.8l-.8.9c-.6.6-.9 1.1-.9 2.4h-2v-.5c0-1.1.4-2.1 1.2-2.9l1.2-1.2c.4-.4.6-.9.6-1.4a2 2 0 1 0-4 0H7a4 4 0 1 1 8 0c0 .9-.4 1.8-1.3 2.7z"/></svg>
 						<div class="ast-branch-info-text">
 							<strong>Operating Hours</strong>
-							<span>Monday to Saturday: 12:30 PM – 06:30 PM<br><span style="color:#ef4444;">Sunday: Closed</span></span>
+							<span>Monday to Saturday: 12:30 PM – 06:30 PM<br><span style="color:#ef4444; font-weight:600;">Sunday: Closed</span></span>
 						</div>
 					</div>
 
 					<div class="ast-branch-info-item">
 						<svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
 						<div class="ast-branch-info-text">
-							<strong>Phone Inquiries</strong>
+							<strong>Direct Telephone</strong>
 							<span>
 								<a href="tel:+922135240710">(021) 35240710</a> &bull; <a href="tel:+923162222983">0316 2222983</a>
 							</span>
@@ -150,19 +137,19 @@
 						<svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-5.805 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
 						<div class="ast-branch-info-text">
 							<strong>WhatsApp Support</strong>
-							<span><a href="https://wa.me/923162222983?text=Hi%2C%20I'd%20like%20to%20book%20an%20appointment%20at%20The%20Asthetik%20DHA%20branch" target="_blank" rel="noopener" style="color:#25d366; font-weight:700;">+92 316 2222983</a></span>
+							<span><a href="https://wa.me/923162222983?text=Hi%2C%20I'd%20like%20to%20book%20an%20appointment%20at%20The%20Asthetik%20DHA%20Phase%206%20branch" target="_blank" rel="noopener" style="color:#25d366; font-weight:700;">+92 316 2222983</a></span>
 						</div>
 					</div>
 				</div>
 
 				<div class="ast-branch-actions">
 					<a href="/book-an-appointment/?branch=dha" class="ast-btn-book">
-						<span>Book at this branch</span> &rarr;
+						<span>Book Consultation at this branch</span> &rarr;
 					</a>
 					<a href="https://share.google/zRemav08VPzk6QftP" class="ast-btn-directions" target="_blank" rel="noopener noreferrer">
-						<span>📍 Get Directions on Google Maps</span>
+						<span>📍 Open in Google Maps</span>
 					</a>
-					<a href="https://wa.me/923162222983?text=Hi%2C%20I'd%20like%20to%20book%20an%20appointment%20at%20The%20Asthetik%20DHA%20branch" class="ast-btn-wa-branch" target="_blank" rel="noopener noreferrer">
+					<a href="https://wa.me/923162222983?text=Hi%2C%20I'd%20like%20to%20book%20an%20appointment%20at%20The%20Asthetik%20DHA%20Phase%206%20branch" class="ast-btn-wa-branch" target="_blank" rel="noopener noreferrer">
 						<svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-5.805 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
 						<span>Chat on WhatsApp</span>
 					</a>
@@ -172,10 +159,10 @@
 			<!-- Embedded Google Map -->
 			<div class="ast-branch-map-card">
 				<div class="ast-branch-map-header">
-					<h3>Interactive Google Map</h3>
+					<h3>Google Maps Location</h3>
 				</div>
 				<div class="ast-branch-map-wrapper">
-					<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2891.033411294426!2d67.0485719!3d24.793908400000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3eb33d78568aaa89%3A0xcc9d77bac3bfd36f!2sThe%20Aesthetic!5e1!3m2!1sen!2s!4v1791607596363!5m2!1sen!2s" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" title="The Asthetik DHA Phase 6 Google Map"></iframe>
+					<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3621.5794829396125!2d67.0485719!3d24.7939084!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3eb33cf8527a4d5d%3A0xc66fe649cb2ea0b9!2sThe%20Asthetik!5e0!3m2!1sen!2s!4v1791607732759!5m2!1sen!2s" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" title="The Asthetik DHA Phase 6 Google Map"></iframe>
 				</div>
 			</div>
 		</div>
@@ -183,41 +170,60 @@
 		<!-- Branch Overview -->
 		<section class="ast-branch-overview">
 			<h3>About Our DHA Phase 6 Clinic</h3>
-			<p>Located in the heart of Shahbaz Commercial in DHA Phase 6 Karachi, The Asthetik offers premium clinical aesthetics in a discreet and comfortable setting. Directed by Dr. Samina Habib, our DHA clinic provides advanced facial rejuvenation, bespoke HydraFacial protocols, PRP therapies, and anti-aging treatments tailored to each patient’s unique skin profile.</p>
-			<p>Conveniently located on Lane 4 with accessible parking, our clinic adheres strictly to international aesthetic standards. Appointments are available Monday through Saturday from 12:30 PM to 06:30 PM.</p>
+			<p>Located on Lane 4 in Shahbaz Commercial Area, DHA Phase 6, The Asthetik offers private aesthetic medical consultations and treatments in a discreet, modern clinical setting. Led by Dr. Samina Habib, this branch delivers signature aesthetic protocols including advanced HydraFacial, laser pigmentation correction, medical peels, and personalized skin rejuvenation.</p>
+			<p>Patients experience dedicated 1-on-1 consultations where comprehensive skin evaluations determine customized treatment courses. Open Monday through Saturday from 12:30 PM to 06:30 PM with private valet/parking convenience.</p>
+
+			<div class="ast-features-grid">
+				<div class="ast-feature-item">
+					<span class="ast-feature-icon">💎</span>
+					<span class="ast-feature-text">Private VIP Treatment Suites</span>
+				</div>
+				<div class="ast-feature-item">
+					<span class="ast-feature-icon">👩‍⚕️</span>
+					<span class="ast-feature-text">Dr. Samina Habib Consultations</span>
+				</div>
+				<div class="ast-feature-item">
+					<span class="ast-feature-icon">🔬</span>
+					<span class="ast-feature-text">Advanced Aesthetic Lasers</span>
+				</div>
+				<div class="ast-feature-item">
+					<span class="ast-feature-icon">📍</span>
+					<span class="ast-feature-text">Prime Shahbaz Commercial Lane 4</span>
+				</div>
+			</div>
 		</section>
 	</main>
 
 	<!-- Standard Footer -->
-	<footer data-elementor-type="footer" data-elementor-id="83" class="elementor elementor-83 elementor-location-footer" style="background:#0b1320; border-top:1px solid rgba(197,168,128,0.2); padding:40px 20px; color:#cbd5e1;">
-		<div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:30px;">
+	<footer class="ast-branch-footer" style="background:#080e18; border-top:1px solid rgba(197,168,128,0.2); padding:50px 24px 30px 24px; color:#cbd5e1;">
+		<div style="max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:36px;">
 			<div>
-				<img width="500" height="150" src="/wp-content/uploads/2025/11/the-ashthetik2Flogo20horizontal20white.webp" alt="The Asthetik" style="max-width:180px; height:auto; margin-bottom:14px;">
-				<p style="font-size:0.88rem; line-height:1.5;">At The Asthetik, we provide medically guided aesthetic and skin care treatments designed to enhance natural beauty and improve skin health under the guidance of Dr. Samina Habib.</p>
+				<img src="/wp-content/uploads/2025/11/the-ashthetik2Flogo20horizontal20white.webp" alt="The Asthetik" style="max-width:180px; height:auto; margin-bottom:16px;">
+				<p style="font-size:0.88rem; line-height:1.6; color:#94a3b8;">At The Asthetik, we provide medically guided aesthetic and skin care treatments designed to enhance natural beauty and improve skin health under the guidance of Dr. Samina Habib.</p>
 			</div>
 			<div>
-				<h4 style="color:#c5a880; font-size:1.05rem; margin-bottom:12px;">Clinic Branches</h4>
-				<ul style="list-style:none; padding:0; margin:0; font-size:0.88rem; display:flex; flex-direction:column; gap:8px;">
-					<li><a href="/shah-faisal-colony/" style="color:#ffffff; text-decoration:none;">• Shah Faisal Colony Branch</a></li>
+				<h4 style="color:#c5a880; font-size:1.05rem; margin-bottom:14px; font-weight:600;">Clinic Branches</h4>
+				<ul style="list-style:none; padding:0; margin:0; font-size:0.88rem; display:flex; flex-direction:column; gap:10px;">
+					<li><a href="/shah-faisal-colony/" style="color:#cbd5e1; text-decoration:none;">• Shah Faisal Colony Branch</a></li>
 					<li><a href="/dha/" style="color:#ffffff; text-decoration:none;">• DHA Phase 6 Branch</a></li>
-					<li><a href="/book-an-appointment/" style="color:#c5a880; text-decoration:none;">• Book Appointment Online</a></li>
+					<li><a href="/book-an-appointment/" style="color:#c5a880; text-decoration:none; font-weight:600;">• Book Appointment Online</a></li>
 				</ul>
 			</div>
 			<div>
-				<h4 style="color:#c5a880; font-size:1.05rem; margin-bottom:12px;">Contact & Hours</h4>
-				<p style="font-size:0.86rem; margin:0 0 6px 0;">📞 Helpline: <a href="tel:+923162222983" style="color:#c5a880; text-decoration:none;">0316 2222983</a></p>
-				<p style="font-size:0.86rem; margin:0 0 6px 0;">💬 WhatsApp: <a href="https://wa.me/923162222983" target="_blank" rel="noopener" style="color:#25d366; text-decoration:none;">+92 316 2222983</a></p>
-				<p style="font-size:0.86rem; margin:0;">🕒 Mon - Sat: 12:30 PM – 06:30 PM (Sun Closed)</p>
+				<h4 style="color:#c5a880; font-size:1.05rem; margin-bottom:14px; font-weight:600;">Direct Contact & Hours</h4>
+				<p style="font-size:0.88rem; margin:0 0 8px 0; color:#cbd5e1;">📞 DHA Desk: <a href="tel:+922135240710" style="color:#c5a880; text-decoration:none;">(021) 35240710</a></p>
+				<p style="font-size:0.88rem; margin:0 0 8px 0; color:#cbd5e1;">💬 WhatsApp: <a href="https://wa.me/923162222983" target="_blank" rel="noopener" style="color:#25d366; text-decoration:none; font-weight:600;">+92 316 2222983</a></p>
+				<p style="font-size:0.88rem; margin:0; color:#94a3b8;">🕒 Mon - Sat: 12:30 PM – 06:30 PM (Sun Closed)</p>
 			</div>
 			<div>
-				<h4 style="color:#c5a880; font-size:1.05rem; margin-bottom:12px;">Follow Us</h4>
-				<div style="display:flex; gap:12px;">
-					<a href="https://www.instagram.com/aestheticsbydrsaminaclinic/" target="_blank" rel="noopener" aria-label="Instagram" style="color:#c5a880; font-size:1.2rem;">Instagram</a>
-					<a href="https://www.tiktok.com/@theasthetikclinic" target="_blank" rel="noopener" aria-label="TikTok" style="color:#c5a880; font-size:1.2rem;">TikTok</a>
+				<h4 style="color:#c5a880; font-size:1.05rem; margin-bottom:14px; font-weight:600;">Follow The Asthetik</h4>
+				<div style="display:flex; gap:14px;">
+					<a href="https://www.instagram.com/aestheticsbydrsaminaclinic/" target="_blank" rel="noopener" aria-label="Instagram" style="color:#c5a880; font-size:0.92rem; text-decoration:none;">Instagram &rarr;</a>
+					<a href="https://www.tiktok.com/@theasthetikclinic" target="_blank" rel="noopener" aria-label="TikTok" style="color:#c5a880; font-size:0.92rem; text-decoration:none;">TikTok &rarr;</a>
 				</div>
 			</div>
 		</div>
-		<div style="max-width:1200px; margin:30px auto 0 auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.06); text-align:center; font-size:0.82rem; color:#64748b;">
+		<div style="max-width:1240px; margin:36px auto 0 auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.06); text-align:center; font-size:0.82rem; color:#64748b;">
 			&copy; The Asthetik. All Rights Reserved.
 		</div>
 	</footer>

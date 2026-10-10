@@ -1,7 +1,11 @@
 /**
- * The Asthetik - Calendly-Style Multi-Step Booking Flow
- * Reads from CLINIC_CONFIG, generates branch-specific 30-minute slots, validates Pakistani numbers,
- * triggers WhatsApp prefilled message, and posts to backup API.
+ * The Asthetik - Luxury Cal.com / Calendly Style Multi-Step Booking Flow
+ * Features:
+ * - Single source of truth from CLINIC_CONFIG
+ * - Interactive Monthly Calendar with Month navigation & Sunday closed detection
+ * - Branch-specific 30-min time slot generation (Shah Faisal vs DHA)
+ * - Pakistani phone number validation
+ * - Instant WhatsApp confirmation + background backup API call
  */
 document.addEventListener('DOMContentLoaded', function () {
   var container = document.getElementById('asthetik-booking-app');
@@ -13,13 +17,42 @@ document.addEventListener('DOMContentLoaded', function () {
     return;
   }
 
+  // Month names for Calendar
+  var MONTH_NAMES = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  var DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  // Current Date anchor
+  var today = new Date();
+  var todayYear = today.getFullYear();
+  var todayMonth = today.getMonth();
+  var todayDate = today.getDate();
+
+  // Pick default date (tomorrow if today is Sunday)
+  var defaultDateObj = new Date();
+  if (defaultDateObj.getDay() === 0) {
+    defaultDateObj.setDate(defaultDateObj.getDate() + 1);
+  }
+
+  function formatYMD(d) {
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
   // Booking State
   var state = {
     currentStep: 1,
     branchId: 'shah-faisal-colony',
     serviceId: config.services[0].id,
     serviceName: config.services[0].name,
-    date: '',
+    viewYear: defaultDateObj.getFullYear(),
+    viewMonth: defaultDateObj.getMonth(),
+    date: formatYMD(defaultDateObj),
     timeSlot: '',
     name: '',
     phone: '',
@@ -27,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
     backupSaved: false
   };
 
-  // Check URL parameters for preselected branch (e.g. ?branch=dha)
+  // URL Parameters override (e.g. ?branch=dha&service=hydrafacial)
   try {
     var params = new URLSearchParams(window.location.search);
     var branchParam = params.get('branch');
@@ -54,242 +87,314 @@ document.addEventListener('DOMContentLoaded', function () {
     return hStr + ':' + mStr + ' ' + period;
   }
 
-  // Helper: Get today in YYYY-MM-DD
-  function getTodayString() {
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = String(now.getMonth() + 1).padStart(2, '0');
-    var day = String(now.getDate()).padStart(2, '0');
-    return year + '-' + month + '-' + day;
-  }
-
-  // Set initial default date (today, or tomorrow if today is Sunday)
-  var initialDate = new Date();
-  if (initialDate.getDay() === 0) {
-    initialDate.setDate(initialDate.getDate() + 1);
-  }
-  var initYear = initialDate.getFullYear();
-  var initMonth = String(initialDate.getMonth() + 1).padStart(2, '0');
-  var initDay = String(initialDate.getDate()).padStart(2, '0');
-  state.date = initYear + '-' + initMonth + '-' + initDay;
-
   // Validate Pakistani Phone format
   function isValidPakistaniPhone(phoneStr) {
     if (!phoneStr) return false;
-    // Strip spaces, dashes, parentheses
     var cleaned = phoneStr.replace(/[\s\-\(\)]/g, '');
-    // Standard formats:
-    // Mobile: 03XX XXXXXXX (11 digits) or +923XX XXXXXXX or 923XX XXXXXXX (12 digits)
-    // Landline: 021 XXXXXXXX (10-11 digits) or +9221 XXXXXXXX
     var mobileRegex = /^(?:\+92|92|0)?3[0-9]{9}$/;
     var landlineRegex = /^(?:\+92|92|0)?(?:21|42|51)[0-9]{7,8}$/;
     return mobileRegex.test(cleaned) || landlineRegex.test(cleaned);
   }
 
-  // Render Skeleton UI
+  // Render Base Skeleton UI
   container.innerHTML = `
     <div class="ast-booking-header">
+      <div class="ast-booking-topline">
+        <span class="ast-booking-brand">
+          <span class="ast-booking-brand-dot"></span>
+          The Asthetik Clinic
+        </span>
+        <span class="ast-booking-secure">
+          🔒 Direct Clinic Booking
+        </span>
+      </div>
+
       <h3 class="ast-booking-title">Book a Consultation</h3>
-      <p class="ast-booking-subtitle">Personalised aesthetic care with Dr. Samina Habib</p>
+      <p class="ast-booking-subtitle">Personalised aesthetic assessment with Dr. Samina Habib</p>
       
-      <div class="ast-progress-bar" role="progressbar" aria-label="Booking Progress" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1">
-        <div class="ast-progress-fill" id="ast-progress-fill" style="width: 0%;"></div>
+      <!-- Cal.com Step Progress Stepper -->
+      <div class="ast-stepper-wrap" role="progressbar" aria-label="Booking Progress" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1">
+        <div class="ast-stepper-line-track"></div>
+        <div class="ast-stepper-line-fill" id="ast-stepper-line" style="width: 0%;"></div>
         
-        <button type="button" class="ast-progress-step active" data-step="1" aria-label="Step 1: Choose Branch">
-          <span class="ast-step-bubble">1</span>
-          <span class="ast-step-label">Branch</span>
-        </button>
-        <button type="button" class="ast-progress-step" data-step="2" aria-label="Step 2: Choose Service">
-          <span class="ast-step-bubble">2</span>
-          <span class="ast-step-label">Service</span>
-        </button>
-        <button type="button" class="ast-progress-step" data-step="3" aria-label="Step 3: Date & Time">
-          <span class="ast-step-bubble">3</span>
-          <span class="ast-step-label">Time</span>
-        </button>
-        <button type="button" class="ast-progress-step" data-step="4" aria-label="Step 4: Your Details">
-          <span class="ast-step-bubble">4</span>
-          <span class="ast-step-label">Details</span>
-        </button>
-        <button type="button" class="ast-progress-step" data-step="5" aria-label="Step 5: Confirm">
-          <span class="ast-step-bubble">5</span>
-          <span class="ast-step-label">Confirm</span>
-        </button>
+        <div class="ast-stepper-items">
+          <button type="button" class="ast-step-btn active" data-step="1" aria-label="Step 1: Branch">
+            <span class="ast-step-num">1</span>
+            <span class="ast-step-name">Branch</span>
+          </button>
+          <button type="button" class="ast-step-btn" data-step="2" aria-label="Step 2: Service">
+            <span class="ast-step-num">2</span>
+            <span class="ast-step-name">Service</span>
+          </button>
+          <button type="button" class="ast-step-btn" data-step="3" aria-label="Step 3: Date & Time">
+            <span class="ast-step-num">3</span>
+            <span class="ast-step-name">Date & Time</span>
+          </button>
+          <button type="button" class="ast-step-btn" data-step="4" aria-label="Step 4: Details">
+            <span class="ast-step-num">4</span>
+            <span class="ast-step-name">Details</span>
+          </button>
+          <button type="button" class="ast-step-btn" data-step="5" aria-label="Step 5: Confirm">
+            <span class="ast-step-num">5</span>
+            <span class="ast-step-name">Confirm</span>
+          </button>
+        </div>
+        <div class="ast-stepper-mobile-info" id="ast-mobile-step-label">Step 1 of 5 • Branch</div>
       </div>
     </div>
 
     <div class="ast-step-container" aria-live="polite">
       <!-- STEP 1: BRANCH -->
       <div class="ast-step-pane active" id="ast-step-1">
-        <h4 class="ast-pane-heading">1. Select Clinic Branch</h4>
-        <p class="ast-pane-desc">Choose which of our two Karachi clinics you would like to visit:</p>
-        <div class="ast-branch-list" role="radiogroup" aria-label="Select Clinic Branch">
+        <div class="ast-pane-header">
+          <h4 class="ast-pane-title">1. Select Clinic Branch</h4>
+          <p class="ast-pane-desc">Choose which of our two Karachi clinics you would like to visit:</p>
+        </div>
+        <div class="ast-branch-select-grid" role="radiogroup" aria-label="Select Clinic Branch">
           <!-- Populated dynamically -->
         </div>
       </div>
 
       <!-- STEP 2: SERVICE -->
       <div class="ast-step-pane" id="ast-step-2">
-        <h4 class="ast-pane-heading">2. Select Treatment or Consultation</h4>
-        <p class="ast-pane-desc">Select the treatment you are interested in. If you are unsure, choose Initial Skin Consultation.</p>
-        <div class="ast-form-group">
-          <label for="ast-service-select" class="ast-label">Treatment / Service</label>
-          <select id="ast-service-select" class="ast-select" aria-label="Select Treatment">
+        <div class="ast-pane-header">
+          <h4 class="ast-pane-title">2. Select Treatment or Assessment</h4>
+          <p class="ast-pane-desc">Choose your desired treatment. Unsure? Select "Initial Skin Consultation":</p>
+        </div>
+        <div class="ast-form-item">
+          <label for="ast-service-select" class="ast-field-label">Selected Treatment / Procedure</label>
+          <select id="ast-service-select" class="ast-custom-select" aria-label="Select Treatment">
             <!-- Populated dynamically -->
           </select>
-          <div class="ast-service-preview-card" id="ast-service-info">
-            <!-- Service preview -->
+          <div class="ast-service-highlight-box" id="ast-service-preview">
+            <!-- Populated dynamically -->
           </div>
         </div>
       </div>
 
-      <!-- STEP 3: DATE & TIME -->
+      <!-- STEP 3: DATE & TIME (Cal.com Style) -->
       <div class="ast-step-pane" id="ast-step-3">
-        <h4 class="ast-pane-heading">3. Choose Appointment Date & Time</h4>
-        <p class="ast-pane-desc">Select a date to view available 30-minute consultation slots:</p>
-        
-        <div class="ast-date-time-grid">
-          <div class="ast-form-group">
-            <label for="ast-date-input" class="ast-label">Preferred Date</label>
-            <input type="date" id="ast-date-input" class="ast-input" min="${getTodayString()}" value="${state.date}" aria-label="Appointment Date">
+        <div class="ast-pane-header">
+          <h4 class="ast-pane-title">3. Choose Appointment Date & Time</h4>
+          <p class="ast-pane-desc">Select a date from the calendar to view available 30-minute consultation slots:</p>
+        </div>
+
+        <div class="ast-cal-wrapper">
+          <!-- Top Doctor Context Strip -->
+          <div class="ast-cal-top-banner">
+            <div class="ast-cal-doctor-badge">
+              <div class="ast-cal-avatar">SH</div>
+              <div class="ast-cal-doc-info-text">
+                <span class="ast-cal-doc-name">Dr. Samina Habib</span>
+                <span class="ast-cal-service-title" id="ast-cal-banner-service">Initial Skin Consultation</span>
+              </div>
+            </div>
+            <div class="ast-cal-meta-pills">
+              <span class="ast-cal-meta-pill">⏱ 30 mins</span>
+              <span class="ast-cal-meta-pill" id="ast-cal-banner-branch">📍 Shah Faisal Colony</span>
+            </div>
           </div>
 
-          <div class="ast-slots-section">
-            <label class="ast-slots-label" id="ast-slots-title">Available Time Slots</label>
-            <div id="ast-slots-container" class="ast-slots-grid" role="radiogroup" aria-labelledby="ast-slots-title">
-              <!-- Time slots populated dynamically -->
+          <!-- Calendar & Slots Split View -->
+          <div class="ast-cal-grid-layout">
+            <!-- Left Panel: Monthly Interactive Calendar -->
+            <div class="ast-cal-left-panel">
+              <div class="ast-cal-month-header">
+                <span class="ast-cal-month-name" id="ast-cal-month-title">October 2026</span>
+                <div class="ast-cal-month-nav-btns">
+                  <button type="button" class="ast-cal-nav-btn" id="ast-btn-prev-month" aria-label="Previous Month">&lsaquo;</button>
+                  <button type="button" class="ast-cal-nav-btn" id="ast-btn-next-month" aria-label="Next Month">&rsaquo;</button>
+                </div>
+              </div>
+
+              <div class="ast-cal-weekdays">
+                <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
+              </div>
+
+              <div class="ast-cal-days-grid" id="ast-cal-days-box" role="grid">
+                <!-- Dynamically populated month days -->
+              </div>
+
+              <div class="ast-cal-legend">
+                <div class="ast-legend-item"><span class="ast-legend-dot active"></span> Selected</div>
+                <div class="ast-legend-item"><span class="ast-legend-dot avail"></span> Available</div>
+                <div class="ast-legend-item"><span class="ast-legend-dot closed"></span> Sunday (Closed)</div>
+              </div>
             </div>
-            <div id="ast-slots-warning" class="ast-slots-notice" style="display: none;"></div>
+
+            <!-- Right Panel: Vertical Time Slots -->
+            <div class="ast-cal-right-panel">
+              <div class="ast-slots-header">
+                <span class="ast-slots-day-title" id="ast-cal-date-label">Wednesday, Oct 14</span>
+                <span class="ast-slots-tz-note">Karachi Time (PKT, UTC+5)</span>
+              </div>
+
+              <div class="ast-slots-scroll-area" id="ast-slots-box" role="radiogroup" aria-label="Consultation Time Slots">
+                <!-- Dynamically populated time slot pills -->
+              </div>
+
+              <div id="ast-slots-notice-box" class="ast-slots-empty-notice" style="display:none;"></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- STEP 4: DETAILS -->
+      <!-- STEP 4: PATIENT DETAILS -->
       <div class="ast-step-pane" id="ast-step-4">
-        <h4 class="ast-pane-heading">4. Patient Information</h4>
-        <p class="ast-pane-desc">Please provide your contact details so our clinic team can confirm your appointment:</p>
-        
-        <div class="ast-form-group" id="group-patient-name">
-          <label for="ast-patient-name" class="ast-label">Full Name <span style="color:var(--asthetik-gold);">*</span></label>
-          <input type="text" id="ast-patient-name" class="ast-input" placeholder="e.g. Fatima Khan" required autocomplete="name">
-          <div class="ast-error-msg">Please enter your full name.</div>
+        <div class="ast-pane-header">
+          <h4 class="ast-pane-title">4. Patient Information</h4>
+          <p class="ast-pane-desc">Please provide your contact details so our reception desk can reserve your appointment:</p>
         </div>
 
-        <div class="ast-form-group" id="group-patient-phone">
-          <label for="ast-patient-phone" class="ast-label">Phone Number (WhatsApp) <span style="color:var(--asthetik-gold);">*</span></label>
-          <input type="tel" id="ast-patient-phone" class="ast-input" placeholder="0316 2222983 or +92 316 2222983" required autocomplete="tel">
-          <div class="ast-input-hint">Format: 03XX XXXXXXX or +92 3XX XXXXXXX (active WhatsApp number)</div>
-          <div class="ast-error-msg">Please enter a valid Pakistani phone number.</div>
+        <div class="ast-form-item" id="ast-group-name">
+          <label for="ast-patient-name" class="ast-field-label">Full Name <span class="req">*</span></label>
+          <input type="text" id="ast-patient-name" class="ast-text-input" placeholder="e.g. Fatima Khan" required autocomplete="name">
+          <div class="ast-validation-error">Please enter your full name.</div>
         </div>
 
-        <div class="ast-form-group">
-          <label for="ast-patient-notes" class="ast-label">Specific Concerns / Notes (Optional)</label>
-          <textarea id="ast-patient-notes" class="ast-textarea" rows="3" placeholder="Tell us about your skin concerns, previous treatments, or preferred doctor timings..."></textarea>
+        <div class="ast-form-item" id="ast-group-phone">
+          <label for="ast-patient-phone" class="ast-field-label">WhatsApp Number <span class="req">*</span></label>
+          <input type="tel" id="ast-patient-phone" class="ast-text-input" placeholder="0316 2222983 or +92 316 2222983" required autocomplete="tel">
+          <div class="ast-field-hint">Pakistani numbers: 03XX XXXXXXX or +92 3XX XXXXXXX (active WhatsApp number)</div>
+          <div class="ast-validation-error">Please enter a valid Pakistani phone number.</div>
+        </div>
+
+        <div class="ast-form-item">
+          <label for="ast-patient-notes" class="ast-field-label">Specific Concerns / Preferred Timings (Optional)</label>
+          <textarea id="ast-patient-notes" class="ast-text-area" rows="3" placeholder="Tell us about your skin concerns, past treatments, or any specific doctor timing preferences..."></textarea>
         </div>
       </div>
 
       <!-- STEP 5: CONFIRMATION -->
       <div class="ast-step-pane" id="ast-step-5">
-        <h4 class="ast-pane-heading">5. Review & Confirm Booking</h4>
-        <p class="ast-pane-desc">Review your consultation request below before sending it directly to our clinic desk:</p>
-        
-        <div class="ast-summary-card" id="ast-booking-summary">
-          <!-- Summary populated dynamically -->
+        <div class="ast-pane-header">
+          <h4 class="ast-pane-title">5. Review & Confirm Booking</h4>
+          <p class="ast-pane-desc">Please review your consultation request details below before sending directly to our clinic desk:</p>
         </div>
 
-        <div class="ast-whatsapp-cta-box" id="ast-wa-box">
-          <p>Click below to open WhatsApp with your prefilled appointment details. Our reception desk will instantly receive and confirm your slot.</p>
-          <a href="#" id="ast-btn-send-whatsapp" class="ast-btn-whatsapp" target="_blank" rel="noopener noreferrer">
+        <div class="ast-voucher-card" id="ast-confirmation-voucher">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div class="ast-wa-cta-container">
+          <p>Click below to open WhatsApp with your prefilled appointment details. Our clinic reception will immediately log and confirm your slot.</p>
+          <a href="#" id="ast-wa-confirm-btn" class="ast-btn-whatsapp-confirm" target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-5.805 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
             <span>Confirm & Open WhatsApp</span>
           </a>
-          <div class="ast-backup-status" id="ast-backup-indicator">Booking logged to clinic system</div>
+          <div class="ast-wa-backup-status" id="ast-api-status-note">
+            <span>✓ Ready to send to clinic WhatsApp</span>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Footer Buttons -->
-      <div class="ast-booking-footer">
-        <button type="button" class="ast-btn ast-btn-secondary" id="ast-btn-prev" style="display: none;">← Back</button>
-        <button type="button" class="ast-btn ast-btn-primary" id="ast-btn-next" style="margin-left: auto;">Continue →</button>
-      </div>
+    <!-- Bottom Footer Navigation -->
+    <div class="ast-booking-footer-nav">
+      <button type="button" class="ast-nav-btn ast-nav-btn-prev" id="ast-btn-back" style="display: none;">
+        &larr; Back
+      </button>
+      <button type="button" class="ast-nav-btn ast-nav-btn-next" id="ast-btn-continue">
+        Continue &rarr;
+      </button>
     </div>
   `;
 
   // Grab Elements
   var stepPanes = container.querySelectorAll('.ast-step-pane');
-  var progressSteps = container.querySelectorAll('.ast-progress-step');
-  var progressFill = container.querySelector('#ast-progress-fill');
-  var btnPrev = container.querySelector('#ast-btn-prev');
-  var btnNext = container.querySelector('#ast-btn-next');
-  var branchListEl = container.querySelector('.ast-branch-list');
+  var stepButtons = container.querySelectorAll('.ast-step-btn');
+  var stepperLineFill = container.querySelector('#ast-stepper-line');
+  var mobileStepLabel = container.querySelector('#ast-mobile-step-label');
+  var btnBack = container.querySelector('#ast-btn-back');
+  var btnContinue = container.querySelector('#ast-btn-continue');
+
+  var branchGridEl = container.querySelector('.ast-branch-select-grid');
   var serviceSelectEl = container.querySelector('#ast-service-select');
-  var serviceInfoEl = container.querySelector('#ast-service-info');
-  var dateInputEl = container.querySelector('#ast-date-input');
-  var slotsContainerEl = container.querySelector('#ast-slots-container');
-  var slotsWarningEl = container.querySelector('#ast-slots-warning');
+  var servicePreviewEl = container.querySelector('#ast-service-preview');
+
+  // Step 3 Elements
+  var calBannerService = container.querySelector('#ast-cal-banner-service');
+  var calBannerBranch = container.querySelector('#ast-cal-banner-branch');
+  var calMonthTitle = container.querySelector('#ast-cal-month-title');
+  var btnPrevMonth = container.querySelector('#ast-btn-prev-month');
+  var btnNextMonth = container.querySelector('#ast-btn-next-month');
+  var calDaysBox = container.querySelector('#ast-cal-days-box');
+  var calDateLabel = container.querySelector('#ast-cal-date-label');
+  var slotsBox = container.querySelector('#ast-slots-box');
+  var slotsNoticeBox = container.querySelector('#ast-slots-notice-box');
+
+  // Step 4 Elements
   var inputName = container.querySelector('#ast-patient-name');
   var inputPhone = container.querySelector('#ast-patient-phone');
   var inputNotes = container.querySelector('#ast-patient-notes');
-  var summaryCard = container.querySelector('#ast-booking-summary');
-  var btnSendWhatsApp = container.querySelector('#ast-btn-send-whatsapp');
-  var waBox = container.querySelector('#ast-wa-box');
-  var backupIndicator = container.querySelector('#ast-backup-indicator');
+  var groupName = container.querySelector('#ast-group-name');
+  var groupPhone = container.querySelector('#ast-group-phone');
 
-  // Populate Step 1: Branches
+  // Step 5 Elements
+  var voucherCard = container.querySelector('#ast-confirmation-voucher');
+  var btnWaConfirm = container.querySelector('#ast-wa-confirm-btn');
+  var apiStatusNote = container.querySelector('#ast-api-status-note');
+
+  // ==========================================================================
+  // RENDER STEP 1: BRANCHES
+  // ==========================================================================
   function renderBranches() {
-    branchListEl.innerHTML = '';
+    branchGridEl.innerHTML = '';
     var branches = config.getAllBranches();
     branches.forEach(function (b) {
       var isSelected = b.id === state.branchId;
       var card = document.createElement('div');
-      card.className = 'ast-branch-card' + (isSelected ? ' selected' : '');
+      card.className = 'ast-branch-select-card' + (isSelected ? ' selected' : '');
       card.setAttribute('role', 'radio');
       card.setAttribute('aria-checked', isSelected ? 'true' : 'false');
       card.setAttribute('tabindex', '0');
       card.setAttribute('data-branch-id', b.id);
 
       card.innerHTML = `
-        <div class="ast-radio-circle">
-          <div class="ast-radio-dot"></div>
+        <div class="ast-radio-ring">
+          <div class="ast-radio-pill"></div>
         </div>
-        <div class="ast-branch-card-body">
-          <div class="ast-branch-card-title">${b.name}</div>
-          <span class="ast-branch-badge">${b.hours.short}</span>
-          <div class="ast-branch-info-row">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            <span>${b.address}</span>
+        <div class="ast-branch-select-details">
+          <div class="ast-branch-select-top">
+            <span class="ast-branch-select-name">${b.name}</span>
+            <span class="ast-branch-badge-pill">${b.hours.short}</span>
           </div>
-          <div class="ast-branch-info-row">
-            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-            <span>${b.primaryPhone}</span>
+          <div class="ast-branch-select-addr">${b.address}</div>
+          <div class="ast-branch-select-meta">
+            <span>📞 ${b.primaryPhone}</span>
+            <span>💬 WhatsApp Available</span>
+            <span>⏱ 30-min Consultations</span>
           </div>
         </div>
       `;
 
-      function selectCard() {
+      function selectBranch() {
         state.branchId = b.id;
-        branchListEl.querySelectorAll('.ast-branch-card').forEach(function(c) {
+        branchGridEl.querySelectorAll('.ast-branch-select-card').forEach(function(c) {
           c.classList.remove('selected');
           c.setAttribute('aria-checked', 'false');
         });
         card.classList.add('selected');
         card.setAttribute('aria-checked', 'true');
-        renderSlots();
+        updateStep3Context();
+        renderTimeSlots();
       }
 
-      card.addEventListener('click', selectCard);
+      card.addEventListener('click', selectBranch);
       card.addEventListener('keydown', function(e) {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
-          selectCard();
+          selectBranch();
         }
       });
 
-      branchListEl.appendChild(card);
+      branchGridEl.appendChild(card);
     });
   }
 
-  // Populate Step 2: Services
+  // ==========================================================================
+  // RENDER STEP 2: SERVICES
+  // ==========================================================================
   function renderServices() {
     serviceSelectEl.innerHTML = '';
     config.services.forEach(function (s) {
@@ -306,10 +411,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var selected = config.services.find(function(s) { return s.id === state.serviceId; });
     if (selected) {
       state.serviceName = selected.name;
-      serviceInfoEl.innerHTML = `
-        <strong>${selected.name}</strong><br>
-        <span style="font-size:0.8rem;color:#94a3b8;">Consultation slot duration: ~${selected.durationMinutes || 30} minutes. Our clinic reception will reserve this slot exclusively for your visit.</span>
+      servicePreviewEl.innerHTML = `
+        <strong>${selected.name}</strong>
+        <span>Consultation slot duration: ~${selected.durationMinutes || 30} minutes. Medical aesthetic evaluation with Dr. Samina Habib including personalized skin treatment planning.</span>
       `;
+      updateStep3Context();
     }
   }
 
@@ -318,115 +424,227 @@ document.addEventListener('DOMContentLoaded', function () {
     updateServicePreview();
   });
 
-  // Populate Step 3: 30-min Slots based on branch & day
-  function renderSlots() {
-    slotsContainerEl.innerHTML = '';
-    slotsWarningEl.style.display = 'none';
+  // ==========================================================================
+  // STEP 3: CAL.COM CALENDAR & TIME SLOTS
+  // ==========================================================================
+  function updateStep3Context() {
+    var branch = config.getBranch(state.branchId);
+    if (calBannerBranch && branch) {
+      calBannerBranch.textContent = '📍 ' + branch.name;
+    }
+    if (calBannerService) {
+      calBannerService.textContent = state.serviceName;
+    }
+  }
+
+  function renderCalendar() {
+    calMonthTitle.textContent = MONTH_NAMES[state.viewMonth] + ' ' + state.viewYear;
+
+    // Prev button disable if at or before current month
+    var isCurrentMonth = state.viewYear === todayYear && state.viewMonth === todayMonth;
+    btnPrevMonth.disabled = isCurrentMonth;
+
+    calDaysBox.innerHTML = '';
+
+    // First day index (0 = Sun, 1 = Mon, ..., 6 = Sat)
+    var firstDayIndex = new Date(state.viewYear, state.viewMonth, 1).getDay();
+    var daysInMonth = new Date(state.viewYear, state.viewMonth + 1, 0).getDate();
+
+    // Leading empty cells
+    for (var i = 0; i < firstDayIndex; i++) {
+      var emptyCell = document.createElement('div');
+      emptyCell.className = 'ast-cal-day-cell empty';
+      calDaysBox.appendChild(emptyCell);
+    }
+
+    // Days in Month
+    for (var day = 1; day <= daysInMonth; day++) {
+      var cellDate = new Date(state.viewYear, state.viewMonth, day);
+      var dayOfWeek = cellDate.getDay();
+      var dateString = formatYMD(cellDate);
+
+      var isPast = false;
+      var isSunday = (dayOfWeek === 0);
+      var isToday = (state.viewYear === todayYear && state.viewMonth === todayMonth && day === todayDate);
+      var isSelected = (dateString === state.date);
+
+      // Check if past date
+      var compareToday = new Date(todayYear, todayMonth, todayDate);
+      if (cellDate < compareToday) {
+        isPast = true;
+      }
+
+      var dayBtn = document.createElement('button');
+      dayBtn.type = 'button';
+      dayBtn.className = 'ast-cal-day-cell';
+      dayBtn.setAttribute('data-date', dateString);
+
+      if (isSunday) {
+        dayBtn.classList.add('sunday-closed');
+        dayBtn.disabled = true;
+        dayBtn.setAttribute('title', 'The Asthetik is closed on Sundays');
+        dayBtn.innerHTML = `<span>${day}</span><small>Closed</small>`;
+      } else if (isPast) {
+        dayBtn.classList.add('past');
+        dayBtn.disabled = true;
+        dayBtn.setAttribute('title', 'Past date');
+        dayBtn.innerHTML = `<span>${day}</span>`;
+      } else {
+        dayBtn.classList.add('available');
+        if (isToday) dayBtn.classList.add('is-today');
+        if (isSelected) dayBtn.classList.add('selected');
+        dayBtn.innerHTML = `<span>${day}</span>`;
+
+        (function (ds, el) {
+          el.addEventListener('click', function () {
+            state.date = ds;
+            state.timeSlot = ''; // Reset selected slot
+            calDaysBox.querySelectorAll('.ast-cal-day-cell').forEach(function(c) {
+              c.classList.remove('selected');
+            });
+            el.classList.add('selected');
+            renderTimeSlots();
+            checkCanContinue();
+          });
+        })(dateString, dayBtn);
+      }
+
+      calDaysBox.appendChild(dayBtn);
+    }
+
+    renderTimeSlots();
+  }
+
+  // Prev / Next Month Nav
+  btnPrevMonth.addEventListener('click', function() {
+    if (state.viewMonth === 0) {
+      state.viewYear--;
+      state.viewMonth = 11;
+    } else {
+      state.viewMonth--;
+    }
+    renderCalendar();
+  });
+
+  btnNextMonth.addEventListener('click', function() {
+    if (state.viewMonth === 11) {
+      state.viewYear++;
+      state.viewMonth = 0;
+    } else {
+      state.viewMonth++;
+    }
+    renderCalendar();
+  });
+
+  // Render Time Slots on Right Panel
+  function renderTimeSlots() {
+    slotsBox.innerHTML = '';
+    slotsNoticeBox.style.display = 'none';
 
     var branch = config.getBranch(state.branchId);
     if (!branch) return;
 
     if (!state.date) {
-      slotsWarningEl.textContent = 'Please choose a date above.';
-      slotsWarningEl.style.display = 'block';
+      calDateLabel.textContent = 'Select a Date';
+      slotsNoticeBox.textContent = 'Please choose an available date on the calendar.';
+      slotsNoticeBox.style.display = 'block';
       return;
     }
 
-    // Check day of week
+    // Format Selected Date Heading (e.g. Wednesday, Oct 14)
     var dateParts = state.date.split('-');
     var chosenDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
-    var dayOfWeek = chosenDate.getDay(); // 0 is Sunday
+    var dayOfWeek = chosenDate.getDay();
+
+    var dayName = DAY_NAMES[dayOfWeek];
+    var monthShort = MONTH_NAMES[chosenDate.getMonth()].substr(0, 3);
+    calDateLabel.textContent = dayName + ', ' + monthShort + ' ' + chosenDate.getDate();
 
     if (dayOfWeek === 0) {
-      slotsWarningEl.innerHTML = `<strong>Clinic Closed on Sundays</strong><br>Please select any date between Monday and Saturday.`;
-      slotsWarningEl.style.display = 'block';
+      slotsNoticeBox.innerHTML = `<strong>Clinic Closed on Sundays</strong><br>Our reception desks are closed on Sundays. Please select Monday through Saturday.`;
+      slotsNoticeBox.style.display = 'block';
       state.timeSlot = '';
+      checkCanContinue();
       return;
     }
 
     var now = new Date();
-    var isToday = chosenDate.toDateString() === now.toDateString();
-    var currentHour = now.getHours();
-    var currentMinute = now.getMinutes();
+    var isChosenToday = chosenDate.toDateString() === now.toDateString();
+    var curHour = now.getHours();
+    var curMinute = now.getMinutes();
 
     var h = branch.hours.startHour;
     var m = branch.hours.startMinute;
     var endH = branch.hours.endHour;
     var endM = branch.hours.endMinute;
+    var slotDuration = branch.hours.slotDurationMinutes || 30;
 
-    var totalSlotsGenerated = 0;
-    var availableSlots = 0;
+    var availableCount = 0;
 
     while (h < endH || (h === endH && m < endM)) {
       var slotLabel = formatTime12h(h, m);
-      var isPast = false;
-      if (isToday) {
-        if (h < currentHour || (h === currentHour && m <= currentMinute + 15)) {
-          isPast = true;
+      var isPastSlot = false;
+
+      if (isChosenToday) {
+        if (h < curHour || (h === curHour && m <= curMinute + 15)) {
+          isPastSlot = true;
         }
       }
 
-      var pill = document.createElement('button');
-      pill.type = 'button';
-      pill.className = 'ast-slot-pill' + (isPast ? ' disabled' : '') + (state.timeSlot === slotLabel ? ' selected' : '');
-      pill.setAttribute('role', 'radio');
-      pill.setAttribute('aria-checked', state.timeSlot === slotLabel ? 'true' : 'false');
-      pill.textContent = slotLabel;
+      var slotBtn = document.createElement('button');
+      slotBtn.type = 'button';
+      slotBtn.className = 'ast-cal-slot-btn' + (state.timeSlot === slotLabel ? ' selected' : '');
+      slotBtn.setAttribute('role', 'radio');
+      slotBtn.setAttribute('aria-checked', state.timeSlot === slotLabel ? 'true' : 'false');
+      slotBtn.innerHTML = `<span>${slotLabel}</span><span class="slot-check">✓</span>`;
 
-      if (!isPast) {
-        availableSlots++;
+      if (isPastSlot) {
+        slotBtn.disabled = true;
+      } else {
+        availableCount++;
         (function (timeStr, el) {
           el.addEventListener('click', function () {
             state.timeSlot = timeStr;
-            slotsContainerEl.querySelectorAll('.ast-slot-pill').forEach(function (p) {
-              p.classList.remove('selected');
-              p.setAttribute('aria-checked', 'false');
+            slotsBox.querySelectorAll('.ast-cal-slot-btn').forEach(function(b) {
+              b.classList.remove('selected');
+              b.setAttribute('aria-checked', 'false');
             });
             el.classList.add('selected');
             el.setAttribute('aria-checked', 'true');
+            checkCanContinue();
           });
-        })(slotLabel, pill);
-      } else {
-        pill.disabled = true;
-        pill.setAttribute('aria-disabled', 'true');
+        })(slotLabel, slotBtn);
       }
 
-      slotsContainerEl.appendChild(pill);
-      totalSlotsGenerated++;
+      slotsBox.appendChild(slotBtn);
 
-      // Advance by 30 minutes
-      m += branch.hours.slotDurationMinutes || 30;
+      m += slotDuration;
       if (m >= 60) {
         h += Math.floor(m / 60);
         m = m % 60;
       }
     }
 
-    if (availableSlots === 0 && isToday) {
-      slotsWarningEl.innerHTML = `<strong>No more available slots today</strong> for this branch.<br>Clinic hours are ${branch.hours.short}. Please pick a future date.`;
-      slotsWarningEl.style.display = 'block';
+    if (availableCount === 0 && isChosenToday) {
+      slotsNoticeBox.innerHTML = `<strong>No more slots for today</strong><br>Hours for ${branch.name} are ${branch.hours.short}. Please pick an upcoming date from the calendar.`;
+      slotsNoticeBox.style.display = 'block';
       state.timeSlot = '';
     }
+
+    checkCanContinue();
   }
 
-  dateInputEl.addEventListener('change', function () {
-    state.date = dateInputEl.value;
-    state.timeSlot = ''; // Reset selected slot on date change
-    renderSlots();
-  });
-
-  // Step 4 Validation
+  // ==========================================================================
+  // STEP 4: PATIENT DETAILS VALIDATION
+  // ==========================================================================
   function validateDetails() {
-    var isValid = true;
+    var valid = true;
     var nameVal = inputName.value.trim();
     var phoneVal = inputPhone.value.trim();
 
-    var groupName = container.querySelector('#group-patient-name');
-    var groupPhone = container.querySelector('#group-patient-phone');
-
-    if (!nameVal || nameVal.length < 2) {
+    if (!nameVal) {
       groupName.classList.add('ast-has-error');
-      isValid = false;
+      valid = false;
     } else {
       groupName.classList.remove('ast-has-error');
       state.name = nameVal;
@@ -434,108 +652,100 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!isValidPakistaniPhone(phoneVal)) {
       groupPhone.classList.add('ast-has-error');
-      isValid = false;
+      valid = false;
     } else {
       groupPhone.classList.remove('ast-has-error');
       state.phone = phoneVal;
     }
 
     state.notes = inputNotes.value.trim();
-    return isValid;
+    return valid;
   }
 
-  // Populate Step 5: Summary
-  function renderSummary() {
-    var branch = config.getBranch(state.branchId);
-    var dateFormatted = state.date;
-    try {
-      var dParts = state.date.split('-');
-      var dObj = new Date(parseInt(dParts[0]), parseInt(dParts[1]) - 1, parseInt(dParts[2]));
-      dateFormatted = dObj.toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    } catch (e) {}
+  inputName.addEventListener('input', function() {
+    if (inputName.value.trim()) groupName.classList.remove('ast-has-error');
+    checkCanContinue();
+  });
 
-    summaryCard.innerHTML = `
-      <div class="ast-summary-row">
-        <span class="ast-summary-label">Selected Branch:</span>
-        <span class="ast-summary-value" style="color:var(--asthetik-gold);">${branch ? branch.name : state.branchId}</span>
+  inputPhone.addEventListener('input', function() {
+    if (isValidPakistaniPhone(inputPhone.value.trim())) groupPhone.classList.remove('ast-has-error');
+    checkCanContinue();
+  });
+
+  // ==========================================================================
+  // STEP 5: CONFIRMATION & WHATSAPP GENERATION
+  // ==========================================================================
+  function renderConfirmation() {
+    var branch = config.getBranch(state.branchId);
+
+    voucherCard.innerHTML = `
+      <div class="ast-voucher-header">
+        <span class="ast-voucher-badge">✓ Consultation Request</span>
+        <span class="ast-voucher-clinic">${branch.name}</span>
       </div>
-      <div class="ast-summary-row">
-        <span class="ast-summary-label">Clinic Address:</span>
-        <span class="ast-summary-value">${branch ? branch.address : ''}</span>
+
+      <div class="ast-voucher-row">
+        <span class="ast-voucher-label">Doctor</span>
+        <span class="ast-voucher-value">Dr. Samina Habib</span>
       </div>
-      <div class="ast-summary-row">
-        <span class="ast-summary-label">Treatment / Service:</span>
-        <span class="ast-summary-value">${state.serviceName}</span>
+      <div class="ast-voucher-row">
+        <span class="ast-voucher-label">Treatment</span>
+        <span class="ast-voucher-value gold">${state.serviceName}</span>
       </div>
-      <div class="ast-summary-row">
-        <span class="ast-summary-label">Date & Time:</span>
-        <span class="ast-summary-value" style="color:#ffffff; font-weight:700;">${dateFormatted} at ${state.timeSlot}</span>
+      <div class="ast-voucher-row">
+        <span class="ast-voucher-label">Appointment Date</span>
+        <span class="ast-voucher-value">${state.date}</span>
       </div>
-      <div class="ast-summary-row">
-        <span class="ast-summary-label">Patient Name:</span>
-        <span class="ast-summary-value">${state.name}</span>
+      <div class="ast-voucher-row">
+        <span class="ast-voucher-label">Reserved Time</span>
+        <span class="ast-voucher-value gold">${state.timeSlot} (PKT)</span>
       </div>
-      <div class="ast-summary-row">
-        <span class="ast-summary-label">Contact (WhatsApp):</span>
-        <span class="ast-summary-value">${state.phone}</span>
+      <div class="ast-voucher-row">
+        <span class="ast-voucher-label">Patient Name</span>
+        <span class="ast-voucher-value">${state.name}</span>
+      </div>
+      <div class="ast-voucher-row">
+        <span class="ast-voucher-label">WhatsApp Contact</span>
+        <span class="ast-voucher-value">${state.phone}</span>
       </div>
       ${state.notes ? `
-      <div class="ast-summary-row">
-        <span class="ast-summary-label">Notes:</span>
-        <span class="ast-summary-value">${state.notes}</span>
+      <div class="ast-voucher-row">
+        <span class="ast-voucher-label">Notes</span>
+        <span class="ast-voucher-value" style="font-size:0.84rem; color:#cbd5e1;">${state.notes}</span>
       </div>` : ''}
+      <div class="ast-voucher-row">
+        <span class="ast-voucher-label">Clinic Location</span>
+        <span class="ast-voucher-value" style="font-size:0.82rem; color:#94a3b8;">${branch.address}</span>
+      </div>
     `;
 
-    // WhatsApp URL
-    var waUrl = config.getWhatsAppUrl({
-      branchId: state.branchId,
-      branchName: branch ? branch.name : state.branchId,
-      serviceName: state.serviceName,
+    // Construct prefilled WhatsApp link
+    var waLink = config.buildWhatsAppUrl(state.branchId, {
+      service: state.serviceName,
       date: state.date,
-      dateFormatted: dateFormatted,
-      timeSlot: state.timeSlot,
+      time: state.timeSlot,
       name: state.name,
       phone: state.phone,
       notes: state.notes
     });
 
-    if (waUrl) {
-      btnSendWhatsApp.href = waUrl;
-      btnSendWhatsApp.style.display = 'inline-flex';
-    } else {
-      // Unresolved / placeholder fallback
-      btnSendWhatsApp.style.display = 'none';
-      waBox.innerHTML = `
-        <div style="padding:15px; background:rgba(197,168,128,0.1); border:1px solid var(--asthetik-gold); border-radius:8px;">
-          <h5 style="margin:0 0 6px 0; color:var(--asthetik-gold);">Appointment Ready to Confirm</h5>
-          <p style="margin:0; font-size:0.85rem; color:#e2e8f0;">
-            Please call our clinic desk at <strong>${branch.primaryPhone}</strong> to confirm this booking.
-          </p>
-        </div>
-      `;
-    }
+    btnWaConfirm.href = waLink;
 
-    // Trigger background backup POST to /api/book
-    triggerBackupBooking(dateFormatted);
+    // Trigger backup POST to server.js
+    if (!state.backupSaved) {
+      sendBackupBooking();
+    }
   }
 
-  // Backup Booking API Call
-  function triggerBackupBooking(dateFormatted) {
-    backupIndicator.textContent = 'Recording booking to backup system...';
-    var branch = config.getBranch(state.branchId);
-
+  function sendBackupBooking() {
     var payload = {
       branchId: state.branchId,
-      branchName: branch ? branch.name : state.branchId,
-      serviceId: state.serviceId,
       serviceName: state.serviceName,
       date: state.date,
-      dateFormatted: dateFormatted,
       timeSlot: state.timeSlot,
       name: state.name,
       phone: state.phone,
-      notes: state.notes,
-      createdAt: new Date().toISOString()
+      notes: state.notes
     };
 
     fetch('/api/book', {
@@ -543,121 +753,117 @@ document.addEventListener('DOMContentLoaded', function () {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-      .then(function (res) { return res.json(); })
-      .then(function (data) {
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (data && data.success) {
         state.backupSaved = true;
-        backupIndicator.textContent = '✓ Booking saved to clinic system. Tap WhatsApp button above to confirm.';
-        backupIndicator.style.color = '#86efac';
-      })
-      .catch(function (err) {
-        console.warn('Backup webhook notice:', err.message);
-        backupIndicator.textContent = 'Tap WhatsApp button above to send your booking to the clinic desk.';
-        backupIndicator.style.color = '#94a3b8';
-      });
+        apiStatusNote.innerHTML = `<span>✓ Logged in clinic booking system (Ref: #${data.bookingId})</span>`;
+      }
+    })
+    .catch(function (err) {
+      console.warn('Backup booking API logging skipped:', err);
+    });
   }
 
-  // Step Navigation
-  function goToStep(step) {
-    if (step < 1 || step > 5) return;
+  // ==========================================================================
+  // STEPPER NAVIGATION LOGIC
+  // ==========================================================================
+  var STEP_TITLES = [
+    'Branch',
+    'Service',
+    'Date & Time',
+    'Details',
+    'Confirm'
+  ];
 
-    // Validate step before advancing
-    if (step > state.currentStep) {
-      if (state.currentStep === 1 && !state.branchId) {
-        alert('Please choose a branch.');
-        return;
-      }
-      if (state.currentStep === 2 && !state.serviceId) {
-        alert('Please select a service.');
-        return;
-      }
-      if (state.currentStep === 3) {
-        if (!state.date || !state.timeSlot) {
-          alert('Please select an appointment date and an available time slot.');
-          return;
-        }
-      }
-      if (state.currentStep === 4) {
-        if (!validateDetails()) {
-          return;
-        }
-      }
-    }
+  function updateStepperUI() {
+    var pct = ((state.currentStep - 1) / (stepButtons.length - 1)) * 100;
+    stepperLineFill.style.width = pct + '%';
 
-    state.currentStep = step;
+    stepButtons.forEach(function (btn) {
+      var stepNum = parseInt(btn.getAttribute('data-step'), 10);
+      var numSpan = btn.querySelector('.ast-step-num');
 
-    // Update Panes
-    stepPanes.forEach(function (pane, idx) {
-      if (idx + 1 === step) {
-        pane.classList.add('active');
+      btn.classList.remove('active', 'completed');
+
+      if (stepNum === state.currentStep) {
+        btn.classList.add('active');
+        numSpan.textContent = stepNum;
+      } else if (stepNum < state.currentStep) {
+        btn.classList.add('completed');
+        numSpan.textContent = '✓';
       } else {
-        pane.classList.remove('active');
+        numSpan.textContent = stepNum;
       }
     });
 
-    // Update Step Indicators
-    progressSteps.forEach(function (stepEl, idx) {
-      var stepNum = idx + 1;
-      stepEl.classList.remove('active', 'completed');
-      if (stepNum === step) {
-        stepEl.classList.add('active');
-      } else if (stepNum < step) {
-        stepEl.classList.add('completed');
-      }
+    mobileStepLabel.textContent = 'Step ' + state.currentStep + ' of 5 • ' + STEP_TITLES[state.currentStep - 1];
+
+    stepPanes.forEach(function (pane, idx) {
+      pane.classList.toggle('active', (idx + 1) === state.currentStep);
     });
 
-    // Update Progress Fill
-    var fillPercent = ((step - 1) / 4) * 100;
-    progressFill.style.width = fillPercent + '%';
+    btnBack.style.display = state.currentStep > 1 ? 'inline-flex' : 'none';
 
-    // Update Footer Buttons
-    if (step === 1) {
-      btnPrev.style.display = 'none';
-      btnNext.style.display = 'inline-flex';
-      btnNext.textContent = 'Select Service →';
-    } else if (step === 2) {
-      btnPrev.style.display = 'inline-flex';
-      btnNext.style.display = 'inline-flex';
-      btnNext.textContent = 'Select Date & Time →';
-    } else if (step === 3) {
-      btnPrev.style.display = 'inline-flex';
-      btnNext.style.display = 'inline-flex';
-      btnNext.textContent = 'Enter Details →';
-    } else if (step === 4) {
-      btnPrev.style.display = 'inline-flex';
-      btnNext.style.display = 'inline-flex';
-      btnNext.textContent = 'Review & Confirm →';
-    } else if (step === 5) {
-      btnPrev.style.display = 'inline-flex';
-      btnNext.style.display = 'none';
-      renderSummary();
+    if (state.currentStep === 5) {
+      btnContinue.style.display = 'none';
+    } else {
+      btnContinue.style.display = 'inline-flex';
+      btnContinue.textContent = (state.currentStep === 4) ? 'Review Booking →' : 'Continue →';
     }
 
-    // Scroll to widget top smoothly
-    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    checkCanContinue();
   }
 
-  // Button Listeners
-  btnNext.addEventListener('click', function () {
-    goToStep(state.currentStep + 1);
+  function checkCanContinue() {
+    var canContinue = true;
+    if (state.currentStep === 1) {
+      canContinue = !!state.branchId;
+    } else if (state.currentStep === 2) {
+      canContinue = !!state.serviceId;
+    } else if (state.currentStep === 3) {
+      canContinue = !!(state.date && state.timeSlot);
+    } else if (state.currentStep === 4) {
+      var n = inputName.value.trim();
+      var p = inputPhone.value.trim();
+      canContinue = !!(n && isValidPakistaniPhone(p));
+    }
+    btnContinue.disabled = !canContinue;
+  }
+
+  btnContinue.addEventListener('click', function () {
+    if (state.currentStep === 4) {
+      if (!validateDetails()) return;
+      state.currentStep = 5;
+      renderConfirmation();
+      updateStepperUI();
+    } else if (state.currentStep < 5) {
+      state.currentStep++;
+      updateStepperUI();
+    }
   });
 
-  btnPrev.addEventListener('click', function () {
-    goToStep(state.currentStep - 1);
+  btnBack.addEventListener('click', function () {
+    if (state.currentStep > 1) {
+      state.currentStep--;
+      updateStepperUI();
+    }
   });
 
-  // Step indicator clicks (only to previously completed steps or current)
-  progressSteps.forEach(function (btn) {
+  // Enable step button clicking for completed steps
+  stepButtons.forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var targetStep = parseInt(btn.getAttribute('data-step'));
+      var targetStep = parseInt(btn.getAttribute('data-step'), 10);
       if (targetStep < state.currentStep) {
-        goToStep(targetStep);
+        state.currentStep = targetStep;
+        updateStepperUI();
       }
     });
   });
 
-  // Initial Boot
+  // Initialize App
   renderBranches();
   renderServices();
-  renderSlots();
-  goToStep(1);
+  renderCalendar();
+  updateStepperUI();
 });
