@@ -2,7 +2,7 @@
    The Asthetik - Luxury Cal.com / Calendly Style Booking Component
    Fonts: Inter, Lato
    Palette: Dark (#0b1320, #0e1724, #121e2d) & Gold (#c5a880, #d8bc96)
-   Responsive down to 320px
+   Immune to Elementor CSS button contamination
    ========================================================================== */
 
 :root {
@@ -27,8 +27,14 @@
 }
 
 /* ==========================================================================
-   Page Container & Elementor Overrides (Eliminating White Box Mismatch)
+   Global Cleanups: Hide top blue bar (Location | WhatsApp/Call)
    ========================================================================== */
+.elementor-element-92350a1,
+.elementor-element.elementor-element-92350a1 {
+  display: none !important;
+}
+
+/* Elementor Section Dark Theme Overrides */
 .elementor-478 .elementor-element.elementor-element-18e4a66c {
   background-color: var(--ast-dark-800) !important;
 }
@@ -53,56 +59,29 @@
   line-height: 1.6;
 }
 
-/* Restyle Jeg Kit Icon Boxes on Right Column to Luxury Dark & Gold */
-.elementor-478 .jeg-elementor-kit.jkit-icon-box .jkit-icon-box-wrapper {
-  background: var(--ast-dark-600) !important;
-  border: 1px solid var(--ast-border) !important;
-  border-radius: 10px !important;
-  padding: 16px 20px !important;
-  transition: all 0.25s ease !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
-}
-
-.elementor-478 .jeg-elementor-kit.jkit-icon-box:hover .jkit-icon-box-wrapper {
-  border-color: var(--ast-gold) !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
-}
-
-.elementor-478 .jeg-elementor-kit.jkit-icon-box .title {
-  color: #ffffff !important;
-  font-size: 1.05rem !important;
-  font-weight: 600 !important;
-  margin-bottom: 4px !important;
-}
-
-.elementor-478 .jeg-elementor-kit.jkit-icon-box .icon-box.icon-box-body .icon-box-description,
-.elementor-478 .jeg-elementor-kit.jkit-icon-box .icon-box.icon-box-body .icon-box-description a {
-  color: var(--ast-gold) !important;
-  font-size: 0.92rem !important;
-  font-weight: 500 !important;
-  text-decoration: none !important;
-}
-
-.elementor-478 .jeg-elementor-kit.jkit-icon-box .icon-box > .icon {
-  color: var(--ast-gold) !important;
-  background-color: var(--ast-gold-bg) !important;
-  border-radius: 8px !important;
-  padding: 10px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.elementor-478 .jeg-elementor-kit.jkit-icon-box .icon-box > .icon i,
-.elementor-478 .jeg-elementor-kit.jkit-icon-box .icon-box > .icon svg {
-  color: var(--ast-gold) !important;
-  fill: var(--ast-gold) !important;
-}
-
 /* ==========================================================================
-   Main Booking Card Architecture
+   CSS ISOLATION: Neutralize Elementor Button Styles
    ========================================================================== */
+#asthetik-booking-app,
+#asthetik-booking-app * {
+  box-sizing: border-box !important;
+}
+
+#asthetik-booking-app button,
+.elementor-kit-107 #asthetik-booking-app button,
+.elementor-478 #asthetik-booking-app button {
+  all: unset !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  font-family: 'Inter', 'Lato', sans-serif !important;
+}
+
+/* Main Booking Container */
 #asthetik-booking-app {
   width: 100%;
   max-width: 680px;
@@ -114,13 +93,6 @@
   color: var(--ast-text-main);
   font-family: 'Inter', 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow: hidden;
-  box-sizing: border-box;
-}
-
-#asthetik-booking-app *,
-#asthetik-booking-app *::before,
-#asthetik-booking-app *::after {
-  box-sizing: border-box;
 }
 
 /* Top App Header */
@@ -158,9 +130,6 @@
 .ast-booking-secure {
   font-size: 0.76rem;
   color: var(--ast-text-muted);
-  display: flex;
-  align-items: center;
-  gap: 5px;
 }
 
 .ast-booking-title {
@@ -179,7 +148,7 @@
 }
 
 /* ==========================================================================
-   Modern Cal.com Stepper (Prevents squished bubbles & distortion)
+   Modern Stepper (Protected from flex stretching and oval distortion)
    ========================================================================== */
 .ast-stepper-wrap {
   position: relative;
@@ -215,72 +184,73 @@
 }
 
 .ast-step-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  outline: none;
-  transition: opacity 0.2s;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  width: auto !important;
+  height: auto !important;
 }
 
 .ast-step-num {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
-  max-width: 28px;
-  max-height: 28px;
-  border-radius: 50%;
-  background: #142234;
-  border: 2px solid rgba(255, 255, 255, 0.18);
-  color: var(--ast-text-muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-sizing: border-box;
-  transition: all 0.25s ease;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  border-radius: 50% !important;
+  background: #142234 !important;
+  border: 2px solid rgba(255, 255, 255, 0.18) !important;
+  color: var(--ast-text-muted) !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transition: all 0.25s ease !important;
 }
 
 .ast-step-name {
-  font-size: 0.74rem;
-  font-weight: 500;
-  color: var(--ast-text-muted);
-  white-space: nowrap;
-  transition: color 0.2s;
+  font-size: 0.74rem !important;
+  font-weight: 500 !important;
+  color: var(--ast-text-muted) !important;
+  white-space: nowrap !important;
+  transition: color 0.2s !important;
 }
 
-/* Active Step State */
 .ast-step-btn.active .ast-step-num {
-  background: var(--ast-gold);
-  border-color: var(--ast-gold);
-  color: #0b1320;
-  box-shadow: 0 0 14px var(--ast-gold-glow);
+  background: var(--ast-gold) !important;
+  border-color: var(--ast-gold) !important;
+  color: #0b1320 !important;
+  box-shadow: 0 0 14px var(--ast-gold-glow) !important;
 }
 
 .ast-step-btn.active .ast-step-name {
-  color: var(--ast-gold);
-  font-weight: 700;
+  color: var(--ast-gold) !important;
+  font-weight: 700 !important;
 }
 
-/* Completed Step State */
 .ast-step-btn.completed .ast-step-num {
-  background: #103426;
-  border-color: #22c55e;
-  color: #4ade80;
+  background: #103426 !important;
+  border-color: #22c55e !important;
+  color: #4ade80 !important;
 }
 
 .ast-step-btn.completed .ast-step-name {
-  color: #cbd5e1;
+  color: #cbd5e1 !important;
 }
 
-/* Mobile Stepper Notice */
 .ast-stepper-mobile-info {
   display: none;
   font-size: 0.8rem;
@@ -290,9 +260,7 @@
   text-align: right;
 }
 
-/* ==========================================================================
-   Step Container & Content Panes
-   ========================================================================== */
+/* Step Container */
 .ast-step-container {
   padding: 24px;
 }
@@ -330,7 +298,7 @@
 }
 
 /* ==========================================================================
-   STEP 1: Branch Selection Cards
+   STEP 1: Branch Cards
    ========================================================================== */
 .ast-branch-select-grid {
   display: flex;
@@ -363,11 +331,6 @@
   box-shadow: 0 0 18px var(--ast-gold-glow);
 }
 
-.ast-branch-select-card:focus-visible {
-  outline: 2px solid var(--ast-gold);
-  outline-offset: 2px;
-}
-
 .ast-radio-ring {
   width: 22px;
   height: 22px;
@@ -378,7 +341,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.2s ease;
 }
 
 .ast-branch-select-card.selected .ast-radio-ring {
@@ -426,7 +388,6 @@
   color: var(--ast-gold);
   font-size: 0.74rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
 }
 
 .ast-branch-select-addr {
@@ -443,12 +404,6 @@
   gap: 14px;
   font-size: 0.82rem;
   color: var(--ast-text-muted);
-}
-
-.ast-branch-select-meta span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
 }
 
 /* ==========================================================================
@@ -481,7 +436,6 @@
   color: #ffffff;
   font-size: 0.96rem;
   font-family: inherit;
-  transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
 }
 
@@ -516,7 +470,7 @@
 }
 
 /* ==========================================================================
-   STEP 3: Cal.com / Calendly Interactive Calendar & Slots (Image 4 Design)
+   STEP 3: Cal.com / Calendly Interactive Calendar & Slots
    ========================================================================== */
 .ast-cal-wrapper {
   background: var(--ast-dark-600);
@@ -526,7 +480,6 @@
   margin-bottom: 8px;
 }
 
-/* Top Doctor / Service Banner */
 .ast-cal-top-banner {
   padding: 14px 18px;
   background: #142336;
@@ -590,11 +543,10 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Two-Panel Layout (Calendar on Left, Slots on Right) */
+/* Two-Panel Layout */
 .ast-cal-grid-layout {
   display: grid;
-  grid-template-columns: 1fr 220px;
-  divide-x: 1px solid var(--ast-border);
+  grid-template-columns: 1fr 230px;
 }
 
 /* Left Panel: Month Calendar */
@@ -623,30 +575,34 @@
 }
 
 .ast-cal-nav-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: #182a3f;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  outline: none;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  border-radius: 8px !important;
+  background: #182a3f !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.1rem !important;
+  cursor: pointer !important;
+  outline: none !important;
+  padding: 0 !important;
 }
 
-.ast-cal-nav-btn:hover:not(:disabled) {
-  background: var(--ast-gold);
-  color: #0b1320;
-  border-color: var(--ast-gold);
+.ast-cal-nav-btn:hover:not(.disabled) {
+  background: var(--ast-gold) !important;
+  color: #0b1320 !important;
+  border-color: var(--ast-gold) !important;
 }
 
-.ast-cal-nav-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+.ast-cal-nav-btn.disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
 }
 
 /* Weekday Labels */
@@ -663,39 +619,50 @@
 
 /* Days Matrix */
 .ast-cal-days-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 6px !important;
+  justify-items: center !important;
+  align-items: center !important;
 }
 
+/* LOCKED SIZE: Exactly 36px circular date cells */
 .ast-cal-day-cell {
-  position: relative;
-  aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: #ffffff;
-  font-size: 0.88rem;
-  font-weight: 500;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.18s ease;
-  padding: 2px;
+  position: relative !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: #ffffff !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  transition: all 0.18s ease !important;
 }
 
 .ast-cal-day-cell.empty {
-  cursor: default;
-  pointer-events: none;
+  cursor: default !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
 }
 
 .ast-cal-day-cell.available:hover {
-  background: #1a2d42;
-  border-color: var(--ast-gold);
-  color: var(--ast-gold);
+  background: #1a2d42 !important;
+  border-color: var(--ast-gold) !important;
+  color: var(--ast-gold) !important;
 }
 
 .ast-cal-day-cell.selected {
@@ -703,13 +670,13 @@
   color: #0b1320 !important;
   font-weight: 700 !important;
   border-color: var(--ast-gold) !important;
-  box-shadow: 0 0 12px var(--ast-gold-glow);
+  box-shadow: 0 0 10px var(--ast-gold-glow) !important;
 }
 
 .ast-cal-day-cell.is-today::after {
   content: '';
   position: absolute;
-  bottom: 4px;
+  bottom: 2px;
   width: 4px;
   height: 4px;
   border-radius: 50%;
@@ -721,23 +688,26 @@
 }
 
 .ast-cal-day-cell.sunday-closed {
-  opacity: 0.35;
-  cursor: not-allowed;
-  color: #94a3b8;
-  background: rgba(255, 255, 255, 0.02);
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  color: #94a3b8 !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 .ast-cal-day-cell.sunday-closed small {
-  font-size: 0.6rem;
-  color: #f87171;
-  line-height: 1;
-  margin-top: 2px;
+  font-size: 0.55rem !important;
+  color: #f87171 !important;
+  line-height: 1 !important;
+  margin-top: 1px !important;
 }
 
 .ast-cal-day-cell.past {
-  opacity: 0.25;
-  cursor: not-allowed;
-  color: #64748b;
+  opacity: 0.25 !important;
+  cursor: not-allowed !important;
+  color: #64748b !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 /* Legend */
@@ -813,36 +783,40 @@
   border-radius: 4px;
 }
 
+/* LOCKED: Time Slot Pill Buttons */
 .ast-cal-slot-btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 10px 14px;
-  background: #142234;
-  border: 1px solid rgba(197, 168, 128, 0.3);
-  border-radius: 8px;
-  color: #ffffff;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.18s ease;
-  user-select: none;
-  box-sizing: border-box;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 8px 14px !important;
+  margin: 0 !important;
+  background: #142234 !important;
+  border: 1px solid rgba(197, 168, 128, 0.3) !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  user-select: none !important;
+  box-sizing: border-box !important;
+  transition: all 0.18s ease !important;
 }
 
-.ast-cal-slot-btn:hover:not(:disabled) {
-  border-color: var(--ast-gold);
-  background: #1c3048;
-  transform: translateY(-1px);
+.ast-cal-slot-btn:hover:not(.disabled) {
+  border-color: var(--ast-gold) !important;
+  background: #1c3048 !important;
+  transform: translateY(-1px) !important;
 }
 
 .ast-cal-slot-btn.selected {
   background: var(--ast-gold) !important;
   color: #0b1320 !important;
   border-color: var(--ast-gold) !important;
-  box-shadow: 0 0 10px var(--ast-gold-glow);
+  box-shadow: 0 0 10px var(--ast-gold-glow) !important;
 }
 
 .ast-cal-slot-btn .slot-check {
@@ -854,12 +828,12 @@
   opacity: 1;
 }
 
-.ast-cal-slot-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  border-color: rgba(255, 255, 255, 0.06);
-  background: #0d1622;
-  text-decoration: line-through;
+.ast-cal-slot-btn.disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  background: #0d1622 !important;
+  text-decoration: line-through !important;
 }
 
 .ast-slots-empty-notice {
@@ -873,7 +847,7 @@
 }
 
 /* ==========================================================================
-   STEP 4: Patient Details Form
+   STEP 4: Patient Details
    ========================================================================== */
 .ast-field-hint {
   font-size: 0.78rem;
@@ -1031,49 +1005,50 @@
 }
 
 .ast-nav-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  outline: none;
-  border: none;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+  border: none !important;
+  user-select: none !important;
 }
 
 .ast-nav-btn-prev {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #cbd5e1 !important;
 }
 
 .ast-nav-btn-prev:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
 }
 
 .ast-nav-btn-next {
-  background: linear-gradient(135deg, var(--ast-gold) 0%, #b39268 100%);
-  color: #0b1320;
-  box-shadow: 0 4px 15px rgba(197, 168, 128, 0.25);
-  margin-left: auto;
+  background: linear-gradient(135deg, var(--ast-gold) 0%, #b39268 100%) !important;
+  color: #0b1320 !important;
+  box-shadow: 0 4px 15px rgba(197, 168, 128, 0.25) !important;
+  margin-left: auto !important;
 }
 
-.ast-nav-btn-next:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--ast-gold-hover) 0%, var(--ast-gold) 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(197, 168, 128, 0.38);
+.ast-nav-btn-next:hover:not(.disabled) {
+  background: linear-gradient(135deg, var(--ast-gold-hover) 0%, var(--ast-gold) 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(197, 168, 128, 0.38) !important;
 }
 
-.ast-nav-btn-next:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+.ast-nav-btn-next.disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 /* ==========================================================================
@@ -1097,7 +1072,7 @@
     max-height: 240px;
   }
   .ast-step-name {
-    display: none;
+    display: none !important;
   }
   .ast-stepper-mobile-info {
     display: block;

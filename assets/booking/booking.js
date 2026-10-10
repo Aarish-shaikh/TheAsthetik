@@ -2,7 +2,8 @@
  * The Asthetik - Luxury Cal.com / Calendly Style Multi-Step Booking Flow
  * Features:
  * - Single source of truth from CLINIC_CONFIG
- * - Interactive Monthly Calendar with Month navigation & Sunday closed detection
+ * - Immune to Elementor button styling (uses accessible role="button" elements)
+ * - Interactive Monthly Calendar with Month navigation & Sunday closed rules
  * - Branch-specific 30-min time slot generation (Shah Faisal vs DHA)
  * - Pakistani phone number validation
  * - Instant WhatsApp confirmation + background backup API call
@@ -96,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return mobileRegex.test(cleaned) || landlineRegex.test(cleaned);
   }
 
-  // Render Base Skeleton UI
+  // Render Base Skeleton UI (using div[role="button"] to stay completely immune to Elementor CSS)
   container.innerHTML = `
     <div class="ast-booking-header">
       <div class="ast-booking-topline">
@@ -118,26 +119,26 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="ast-stepper-line-fill" id="ast-stepper-line" style="width: 0%;"></div>
         
         <div class="ast-stepper-items">
-          <button type="button" class="ast-step-btn active" data-step="1" aria-label="Step 1: Branch">
+          <div role="button" tabindex="0" class="ast-step-btn active" data-step="1" aria-label="Step 1: Branch">
             <span class="ast-step-num">1</span>
             <span class="ast-step-name">Branch</span>
-          </button>
-          <button type="button" class="ast-step-btn" data-step="2" aria-label="Step 2: Service">
+          </div>
+          <div role="button" tabindex="0" class="ast-step-btn" data-step="2" aria-label="Step 2: Service">
             <span class="ast-step-num">2</span>
             <span class="ast-step-name">Service</span>
-          </button>
-          <button type="button" class="ast-step-btn" data-step="3" aria-label="Step 3: Date & Time">
+          </div>
+          <div role="button" tabindex="0" class="ast-step-btn" data-step="3" aria-label="Step 3: Date & Time">
             <span class="ast-step-num">3</span>
             <span class="ast-step-name">Date & Time</span>
-          </button>
-          <button type="button" class="ast-step-btn" data-step="4" aria-label="Step 4: Details">
+          </div>
+          <div role="button" tabindex="0" class="ast-step-btn" data-step="4" aria-label="Step 4: Details">
             <span class="ast-step-num">4</span>
             <span class="ast-step-name">Details</span>
-          </button>
-          <button type="button" class="ast-step-btn" data-step="5" aria-label="Step 5: Confirm">
+          </div>
+          <div role="button" tabindex="0" class="ast-step-btn" data-step="5" aria-label="Step 5: Confirm">
             <span class="ast-step-num">5</span>
             <span class="ast-step-name">Confirm</span>
-          </button>
+          </div>
         </div>
         <div class="ast-stepper-mobile-info" id="ast-mobile-step-label">Step 1 of 5 • Branch</div>
       </div>
@@ -202,8 +203,8 @@ document.addEventListener('DOMContentLoaded', function () {
               <div class="ast-cal-month-header">
                 <span class="ast-cal-month-name" id="ast-cal-month-title">October 2026</span>
                 <div class="ast-cal-month-nav-btns">
-                  <button type="button" class="ast-cal-nav-btn" id="ast-btn-prev-month" aria-label="Previous Month">&lsaquo;</button>
-                  <button type="button" class="ast-cal-nav-btn" id="ast-btn-next-month" aria-label="Next Month">&rsaquo;</button>
+                  <div role="button" tabindex="0" class="ast-cal-nav-btn" id="ast-btn-prev-month" aria-label="Previous Month">&lsaquo;</div>
+                  <div role="button" tabindex="0" class="ast-cal-nav-btn" id="ast-btn-next-month" aria-label="Next Month">&rsaquo;</div>
                 </div>
               </div>
 
@@ -291,12 +292,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     <!-- Bottom Footer Navigation -->
     <div class="ast-booking-footer-nav">
-      <button type="button" class="ast-nav-btn ast-nav-btn-prev" id="ast-btn-back" style="display: none;">
+      <div role="button" tabindex="0" class="ast-nav-btn ast-nav-btn-prev" id="ast-btn-back" style="display: none;">
         &larr; Back
-      </button>
-      <button type="button" class="ast-nav-btn ast-nav-btn-next" id="ast-btn-continue">
+      </div>
+      <div role="button" tabindex="0" class="ast-nav-btn ast-nav-btn-next" id="ast-btn-continue">
         Continue &rarr;
-      </button>
+      </div>
     </div>
   `;
 
@@ -440,9 +441,14 @@ document.addEventListener('DOMContentLoaded', function () {
   function renderCalendar() {
     calMonthTitle.textContent = MONTH_NAMES[state.viewMonth] + ' ' + state.viewYear;
 
-    // Prev button disable if at or before current month
     var isCurrentMonth = state.viewYear === todayYear && state.viewMonth === todayMonth;
-    btnPrevMonth.disabled = isCurrentMonth;
+    if (isCurrentMonth) {
+      btnPrevMonth.classList.add('disabled');
+      btnPrevMonth.setAttribute('aria-disabled', 'true');
+    } else {
+      btnPrevMonth.classList.remove('disabled');
+      btnPrevMonth.removeAttribute('aria-disabled');
+    }
 
     calDaysBox.innerHTML = '';
 
@@ -457,7 +463,7 @@ document.addEventListener('DOMContentLoaded', function () {
       calDaysBox.appendChild(emptyCell);
     }
 
-    // Days in Month
+    // Days in Month (rendered as div[role="button"])
     for (var day = 1; day <= daysInMonth; day++) {
       var cellDate = new Date(state.viewYear, state.viewMonth, day);
       var dayOfWeek = cellDate.getDay();
@@ -468,43 +474,51 @@ document.addEventListener('DOMContentLoaded', function () {
       var isToday = (state.viewYear === todayYear && state.viewMonth === todayMonth && day === todayDate);
       var isSelected = (dateString === state.date);
 
-      // Check if past date
       var compareToday = new Date(todayYear, todayMonth, todayDate);
       if (cellDate < compareToday) {
         isPast = true;
       }
 
-      var dayBtn = document.createElement('button');
-      dayBtn.type = 'button';
+      var dayBtn = document.createElement('div');
+      dayBtn.setAttribute('role', 'button');
       dayBtn.className = 'ast-cal-day-cell';
       dayBtn.setAttribute('data-date', dateString);
 
       if (isSunday) {
         dayBtn.classList.add('sunday-closed');
-        dayBtn.disabled = true;
+        dayBtn.setAttribute('aria-disabled', 'true');
         dayBtn.setAttribute('title', 'The Asthetik is closed on Sundays');
         dayBtn.innerHTML = `<span>${day}</span><small>Closed</small>`;
       } else if (isPast) {
         dayBtn.classList.add('past');
-        dayBtn.disabled = true;
+        dayBtn.setAttribute('aria-disabled', 'true');
         dayBtn.setAttribute('title', 'Past date');
         dayBtn.innerHTML = `<span>${day}</span>`;
       } else {
         dayBtn.classList.add('available');
+        dayBtn.setAttribute('tabindex', '0');
         if (isToday) dayBtn.classList.add('is-today');
         if (isSelected) dayBtn.classList.add('selected');
         dayBtn.innerHTML = `<span>${day}</span>`;
 
         (function (ds, el) {
-          el.addEventListener('click', function () {
+          function selectThisDay() {
             state.date = ds;
-            state.timeSlot = ''; // Reset selected slot
+            state.timeSlot = '';
             calDaysBox.querySelectorAll('.ast-cal-day-cell').forEach(function(c) {
               c.classList.remove('selected');
             });
             el.classList.add('selected');
             renderTimeSlots();
             checkCanContinue();
+          }
+
+          el.addEventListener('click', selectThisDay);
+          el.addEventListener('keydown', function(e) {
+            if (e.key === ' ' || e.key === 'Enter') {
+              e.preventDefault();
+              selectThisDay();
+            }
           });
         })(dateString, dayBtn);
       }
@@ -517,6 +531,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Prev / Next Month Nav
   btnPrevMonth.addEventListener('click', function() {
+    if (btnPrevMonth.classList.contains('disabled')) return;
     if (state.viewMonth === 0) {
       state.viewYear--;
       state.viewMonth = 11;
@@ -536,7 +551,7 @@ document.addEventListener('DOMContentLoaded', function () {
     renderCalendar();
   });
 
-  // Render Time Slots on Right Panel
+  // Render Time Slots on Right Panel (using div[role="radio"])
   function renderTimeSlots() {
     slotsBox.innerHTML = '';
     slotsNoticeBox.style.display = 'none';
@@ -551,7 +566,6 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // Format Selected Date Heading (e.g. Wednesday, Oct 14)
     var dateParts = state.date.split('-');
     var chosenDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
     var dayOfWeek = chosenDate.getDay();
@@ -591,19 +605,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
 
-      var slotBtn = document.createElement('button');
-      slotBtn.type = 'button';
-      slotBtn.className = 'ast-cal-slot-btn' + (state.timeSlot === slotLabel ? ' selected' : '');
+      var slotBtn = document.createElement('div');
       slotBtn.setAttribute('role', 'radio');
+      slotBtn.className = 'ast-cal-slot-btn' + (state.timeSlot === slotLabel ? ' selected' : '');
       slotBtn.setAttribute('aria-checked', state.timeSlot === slotLabel ? 'true' : 'false');
       slotBtn.innerHTML = `<span>${slotLabel}</span><span class="slot-check">✓</span>`;
 
       if (isPastSlot) {
-        slotBtn.disabled = true;
+        slotBtn.classList.add('disabled');
+        slotBtn.setAttribute('aria-disabled', 'true');
       } else {
         availableCount++;
+        slotBtn.setAttribute('tabindex', '0');
         (function (timeStr, el) {
-          el.addEventListener('click', function () {
+          function selectThisSlot() {
             state.timeSlot = timeStr;
             slotsBox.querySelectorAll('.ast-cal-slot-btn').forEach(function(b) {
               b.classList.remove('selected');
@@ -612,6 +627,14 @@ document.addEventListener('DOMContentLoaded', function () {
             el.classList.add('selected');
             el.setAttribute('aria-checked', 'true');
             checkCanContinue();
+          }
+
+          el.addEventListener('click', selectThisSlot);
+          el.addEventListener('keydown', function(e) {
+            if (e.key === ' ' || e.key === 'Enter') {
+              e.preventDefault();
+              selectThisSlot();
+            }
           });
         })(slotLabel, slotBtn);
       }
@@ -719,7 +742,6 @@ document.addEventListener('DOMContentLoaded', function () {
       </div>
     `;
 
-    // Construct prefilled WhatsApp link
     var waLink = config.buildWhatsAppUrl(state.branchId, {
       service: state.serviceName,
       date: state.date,
@@ -731,7 +753,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     btnWaConfirm.href = waLink;
 
-    // Trigger backup POST to server.js
     if (!state.backupSaved) {
       sendBackupBooking();
     }
@@ -828,10 +849,18 @@ document.addEventListener('DOMContentLoaded', function () {
       var p = inputPhone.value.trim();
       canContinue = !!(n && isValidPakistaniPhone(p));
     }
-    btnContinue.disabled = !canContinue;
+    
+    if (canContinue) {
+      btnContinue.classList.remove('disabled');
+      btnContinue.removeAttribute('aria-disabled');
+    } else {
+      btnContinue.classList.add('disabled');
+      btnContinue.setAttribute('aria-disabled', 'true');
+    }
   }
 
   btnContinue.addEventListener('click', function () {
+    if (btnContinue.classList.contains('disabled')) return;
     if (state.currentStep === 4) {
       if (!validateDetails()) return;
       state.currentStep = 5;
@@ -857,6 +886,16 @@ document.addEventListener('DOMContentLoaded', function () {
       if (targetStep < state.currentStep) {
         state.currentStep = targetStep;
         updateStepperUI();
+      }
+    });
+    btn.addEventListener('keydown', function(e) {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        var targetStep = parseInt(btn.getAttribute('data-step'), 10);
+        if (targetStep < state.currentStep) {
+          state.currentStep = targetStep;
+          updateStepperUI();
+        }
       }
     });
   });
