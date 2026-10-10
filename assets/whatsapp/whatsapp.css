@@ -1,0 +1,220 @@
+/* ==========================================================================
+   The Asthetik - Floating WhatsApp Integration
+   Accessible, lightweight, responsive, non-intrusive floating button & popup
+   ========================================================================== */
+
+:root {
+  --ast-wa-green: #25d366;
+  --ast-wa-green-hover: #20ba5a;
+  --ast-wa-dark: #0f1e2f;
+  --ast-wa-card: #142336;
+  --ast-wa-border: rgba(197, 168, 128, 0.25);
+  --ast-wa-gold: #c5a880;
+}
+
+/* Floating Button */
+.ast-wa-float-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99990;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--ast-wa-green);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(37, 211, 102, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+  text-decoration: none;
+}
+
+.ast-wa-float-btn:hover {
+  background: var(--ast-wa-green-hover);
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.55), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.ast-wa-float-btn:focus-visible {
+  outline: 3px solid var(--ast-wa-gold);
+  outline-offset: 3px;
+}
+
+.ast-wa-float-btn svg {
+  width: 32px;
+  height: 32px;
+  fill: #ffffff;
+}
+
+/* Pulse Animation Ring */
+.ast-wa-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--ast-wa-green);
+  opacity: 0;
+  animation: astWaPulse 2.8s infinite;
+  pointer-events: none;
+}
+
+@keyframes astWaPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* Branch Picker Modal */
+.ast-wa-modal {
+  position: fixed;
+  bottom: 92px;
+  right: 24px;
+  z-index: 99991;
+  width: 320px;
+  max-width: calc(100vw - 36px);
+  background: var(--ast-wa-dark);
+  border: 1px solid var(--ast-wa-border);
+  border-radius: 14px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  animation: astWaSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ast-wa-modal.open {
+  display: flex;
+}
+
+@keyframes astWaSlideUp {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ast-wa-modal-header {
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #182a3f 0%, #101d2d 100%);
+  border-bottom: 1px solid var(--ast-wa-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ast-wa-modal-title {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.ast-wa-modal-subtitle {
+  margin: 2px 0 0 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.ast-wa-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  border-radius: 4px;
+}
+
+.ast-wa-close-btn:hover {
+  color: #ffffff;
+}
+
+.ast-wa-modal-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--ast-wa-dark);
+}
+
+.ast-wa-branch-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--ast-wa-card);
+  border: 1px solid var(--ast-wa-border);
+  border-radius: 9px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  color: #ffffff;
+}
+
+.ast-wa-branch-link:hover {
+  border-color: var(--ast-wa-gold);
+  background: #1a2e47;
+  transform: translateX(3px);
+}
+
+.ast-wa-branch-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.ast-wa-branch-meta {
+  font-size: 0.76rem;
+  color: #94a3b8;
+}
+
+.ast-wa-branch-icon {
+  width: 20px;
+  height: 20px;
+  fill: var(--ast-wa-green);
+  flex-shrink: 0;
+}
+
+.ast-wa-modal-footer {
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ast-wa-direct-link {
+  font-size: 0.78rem;
+  color: var(--ast-wa-gold);
+  text-decoration: none;
+}
+
+.ast-wa-direct-link:hover {
+  text-decoration: underline;
+}
+
+/* Mobile responsive (down to 360px) */
+@media (max-width: 480px) {
+  .ast-wa-float-btn {
+    bottom: 18px;
+    right: 18px;
+    width: 52px;
+    height: 52px;
+  }
+  .ast-wa-float-btn svg {
+    width: 28px;
+    height: 28px;
+  }
+  .ast-wa-modal {
+    bottom: 78px;
+    right: 14px;
+    left: 14px;
+    width: auto;
+  }
+}
