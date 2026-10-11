@@ -1,0 +1,316 @@
+/* ==========================================================================
+   The Asthetik - About Us Page Theme & Custom Sections
+   Matching Homepage Palette: Deep Charcoal (#18162B), Warm Gold (#E3B077), Champagne (#FFF9F2)
+   Fonts: Lato, Inter
+   ========================================================================== */
+
+:root {
+  --ast-gold: #e3b077;
+  --ast-gold-hover: #d49d60;
+  --ast-primary: #18162b;
+  --ast-muted: #7b798c;
+  --ast-body: #555266;
+  --ast-champagne: #fff9f2;
+  --ast-border: rgba(227, 176, 119, 0.28);
+}
+
+/* Base resets for About Us custom elements */
+.ast-about-content-wrapper {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 20px 24px 60px 24px;
+  font-family: 'Lato', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--ast-primary);
+}
+
+/* ==========================================
+   SECTION 1: Delivering Trusted Care Since 2006
+   ========================================== */
+.ast-about-intro-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.95fr;
+  gap: 48px;
+  align-items: center;
+  margin-bottom: 50px;
+}
+
+.ast-about-intro-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.ast-about-tag {
+  color: var(--ast-gold);
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.ast-about-title {
+  font-size: 2.35rem;
+  font-weight: 700;
+  color: var(--ast-primary);
+  line-height: 1.25;
+  margin: 0 0 16px 0;
+  letter-spacing: -0.01em;
+}
+
+.ast-about-desc {
+  font-size: 1.02rem;
+  line-height: 1.65;
+  color: var(--ast-body);
+  margin: 0 0 28px 0;
+}
+
+.ast-about-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 32px;
+}
+
+.ast-about-feature-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid var(--ast-border);
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(24, 22, 43, 0.04);
+  transition: all 0.22s ease;
+}
+
+.ast-about-feature-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ast-gold);
+  box-shadow: 0 8px 25px rgba(227, 176, 119, 0.18);
+}
+
+.ast-feature-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--ast-champagne);
+  border: 1px solid rgba(227, 176, 119, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ast-gold);
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.ast-feature-icon-box.gold-filled {
+  background: var(--ast-gold);
+  color: #ffffff;
+  border-color: var(--ast-gold);
+}
+
+.ast-feature-details h4 {
+  margin: 0 0 4px 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ast-primary);
+}
+
+.ast-feature-details p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ast-body);
+}
+
+.ast-about-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  align-self: flex-start;
+  padding: 14px 34px;
+  background: var(--ast-gold);
+  color: #ffffff !important;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none !important;
+  box-shadow: 0 4px 18px rgba(227, 176, 119, 0.4);
+  transition: all 0.22s ease;
+}
+
+.ast-about-cta-btn:hover {
+  background: var(--ast-gold-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(227, 176, 119, 0.5);
+}
+
+.ast-about-intro-media {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 45px rgba(24, 22, 43, 0.08);
+  border: 1px solid var(--ast-border);
+  background: var(--ast-champagne);
+}
+
+.ast-about-intro-media img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* ==========================================
+   SECTION 2: Stats Counter Banner
+   ========================================== */
+.ast-about-stats-card {
+  background: var(--ast-champagne);
+  border: 1px solid var(--ast-border);
+  border-radius: 20px;
+  padding: 40px 30px;
+  margin-bottom: 70px;
+  box-shadow: 0 10px 30px rgba(24, 22, 43, 0.04);
+}
+
+.ast-about-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  text-align: center;
+}
+
+.ast-stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ast-stat-icon {
+  font-size: 2.2rem;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.ast-stat-number {
+  font-size: 2.45rem;
+  font-weight: 800;
+  color: var(--ast-primary);
+  line-height: 1.1;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.ast-stat-plus {
+  color: var(--ast-gold);
+  font-weight: 700;
+  font-size: 1.85rem;
+  margin-left: 2px;
+}
+
+.ast-stat-label {
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--ast-muted);
+}
+
+/* ==========================================
+   SECTION 3: About Dr. Samina Habib
+   ========================================== */
+.ast-about-doctor-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.15fr;
+  gap: 48px;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.ast-about-doctor-media {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 45px rgba(24, 22, 43, 0.08);
+  border: 1px solid var(--ast-border);
+  background: var(--ast-champagne);
+}
+
+.ast-about-doctor-media img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.ast-about-doctor-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.ast-doc-name-title {
+  font-size: 2.35rem;
+  font-weight: 700;
+  color: var(--ast-primary);
+  line-height: 1.25;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.01em;
+}
+
+.ast-doc-credentials-pill {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #b8864e;
+  margin-bottom: 4px;
+}
+
+.ast-doc-affiliation {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ast-primary);
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+
+.ast-doc-bio-paragraph {
+  font-size: 1.01rem;
+  line-height: 1.68;
+  color: var(--ast-body);
+  margin: 0 0 28px 0;
+}
+
+.ast-doc-bio-paragraph strong {
+  color: var(--ast-primary);
+}
+
+/* Responsive down to 320px */
+@media (max-width: 991px) {
+  .ast-about-intro-grid,
+  .ast-about-doctor-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .ast-about-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+}
+
+@media (max-width: 580px) {
+  .ast-about-title,
+  .ast-doc-name-title {
+    font-size: 1.75rem;
+  }
+  .ast-about-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .ast-stat-number {
+    font-size: 1.85rem;
+  }
+  .ast-about-stats-card {
+    padding: 28px 18px;
+  }
+  .ast-about-feature-card {
+    padding: 14px 16px;
+  }
+}
