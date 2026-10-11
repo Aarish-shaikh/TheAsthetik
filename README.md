@@ -66,3 +66,50 @@ Per the requirement to replicate **everything same to same including mistakes an
 - **`assets/external/`**: Locally cached Trustindex review SVGs, Google review avatars, and embed helpers.
 - **`server.js`**: Lightweight, zero-dependency Node.js HTTP server supporting clean URLs, MIME types, and 404 fallbacks.
 - **`tools/`**: Crawling, asset downloading, and verification scripts.
+
+---
+
+## 👨‍💻 Developer Guide: Adding New Pages (Blog, Treatments, etc.)
+
+If you are joining development or pulling the latest updates from another machine:
+
+### 1. Update Your Local Clone
+Run the following in your terminal to get all latest updates, new brand styles, and branch pages:
+```bash
+git fetch origin
+git checkout main
+git pull origin main
+```
+*(If you have uncommitted local edits that you wish to discard, run `git reset --hard origin/main`)*
+
+### 2. Brand Guidelines & Palette
+Always adhere to the luxury homepage palette across all new pages:
+- **Background:** Cream / Linen `#FAF7F2`
+- **Cards / Containers:** White `#FFFFFF` with border `rgba(227, 176, 119, 0.28)`
+- **Headings & Primary Text:** Deep Charcoal `#18162B`
+- **Pills / Gold Accents / Buttons:** Warm Gold `#E3B077` (hover: `#d49d60`)
+- **Body Text:** `#555266` | Muted: `#7B798C`
+- **Typography:** `'Lato', 'Inter', sans-serif`
+- ⚠️ **Strict Rule:** Never use dark navy blue (`#0b1320`, `#0d1b2a`, `#111f30`).
+
+### 3. How to Add a New Page (e.g. `/blog/` or `/treatments/...`)
+The project uses clean folder-based URLs served automatically by `server.js`:
+1. Create a folder (e.g. `blog/index.html` or `treatments/chemical-peel/index.html`).
+2. Copy the header navigation and footer structure from `about-us/index.html` or `shah-faisal-colony/index.html`.
+3. Include the floating WhatsApp widget and clinic config before `</body>`:
+   ```html
+   <!-- Central Clinic Config & Floating WhatsApp Widget -->
+   <script src="/clinic-config.js"></script>
+   <link rel="stylesheet" href="/assets/whatsapp/whatsapp.css">
+   <script src="/assets/whatsapp/whatsapp.js"></script>
+   ```
+4. For treatments:
+   - Add the new treatment link to the dropdown navigation under the `Treatments` menu in the headers.
+   - If the treatment can be booked online, add it to the `treatments` list in `clinic-config.js` so it automatically appears in the interactive booking calendar on `/book-an-appointment/`.
+
+### 4. Running Locally
+```bash
+node server.js
+```
+Then open `http://localhost:3000`.
+
